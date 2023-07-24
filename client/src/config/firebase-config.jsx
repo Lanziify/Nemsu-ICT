@@ -1,17 +1,17 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-
+import { getMessaging } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: "",
-  authDomain: "nemsu-ict.firebaseapp.com",
-  projectId: "nemsu-ict",
-  storageBucket: "nemsu-ict.appspot.com",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
   messagingSenderId: "",
-  appId: "",
+  appId: ""
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const messaging = getMessaging(app);
 export default app;

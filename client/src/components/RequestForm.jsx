@@ -6,6 +6,11 @@ import { IoCloseCircle } from "react-icons/io5";
 import { FaChevronDown } from "react-icons/fa";
 import Swal from "sweetalert2";
 import FormInput from "./FormInput";
+import Button from "./Button";
+import { AnimatePresence, motion } from "framer-motion";
+import successSfx from "../assets/success.mp3";
+import errorSfx from "../assets/error.mp3";
+import { dropdownAnimation, popUp, popUpItem } from "../animations/variants";
 
 function RequestForm(props) {
   const {
@@ -17,9 +22,6 @@ function RequestForm(props) {
   } = props;
   const [values, setValues] = useState({
     uid: user.uid,
-    name: "",
-    email: user.email,
-    position: "",
     device: "",
     brand: "",
     model: "",
@@ -28,37 +30,43 @@ function RequestForm(props) {
     complaints: "",
   });
   const [error, setError] = useState({});
-  const [isToggled, setToggle] = useState(false);
+  const [dropdown, setDropdown] = useState(false);
   const dropDownButtonRef = useRef();
   const dropDownContentRef = useRef();
 
-  const devices = [
-    "Printer",
-    "Desktop computer",
-    "Laptop",
-    "Network devices",
-    "Other",
-  ];
+  const devices = ["Printer", "Desktop computer", "Laptop", "Network devices"];
 
-  function handleOnChange(e) {
+  const handleOnChange = (e) => {
     if (selectedRequest) {
       return;
     }
     setValues({ ...values, [e.target.name]: e.target.value });
     setError({ ...error, [e.target.name]: "" });
-  }
+  };
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const formErrors = validateRequest(values);
-    if (Object.keys(formErrors).length > 0) {
-      setError(formErrors);
-      return;
-    }
     try {
+      const formErrors = validateRequest(values);
+      if (Object.keys(formErrors).length > 0) {
+        setError(formErrors);
+        return;
+      }
+
+      // Show loading before the API call
+      Swal.fire({
+        title: "Submitting...",
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
       const token = await user.getIdToken();
-      axios.post(
-        `${baseURL}/request`,
+
+      await axios.post(
+        `${baseURL}/create`,
         { data: values },
         {
           headers: {
@@ -66,18 +74,10 @@ function RequestForm(props) {
           },
         }
       );
-      setValues({
-        uid: user.uid,
-        name: "",
-        email: user.email,
-        position: "",
-        device: "",
-        brand: "",
-        model: "",
-        serial: "",
-        property: "",
-        complaints: "",
-      });
+
+      // Hide loading after the API call completes
+      Swal.close();
+
       Swal.fire({
         icon: "success",
         title: "Thank you!",
@@ -86,15 +86,37 @@ function RequestForm(props) {
         confirmButtonText: "Confirm",
         confirmButtonColor: "#3b82f6",
       });
+
+      setValues({
+        uid: user.uid,
+        device: "",
+        brand: "",
+        model: "",
+        serial: "",
+        property: "",
+        complaints: "",
+      });
+
+      const ringtone = new Audio(successSfx);
+      ringtone.play();
     } catch (error) {
-      console.log(error);
+      Swal.fire({
+        icon: "error",
+        title: "Something went wrong!",
+        text: error.response.data.message,
+        showConfirmButton: true,
+        confirmButtonText: "Return",
+        confirmButtonColor: "#3b82f6",
+      });
+      const ringtone = new Audio(errorSfx);
+      ringtone.play();
     }
   }
 
   const handleSelectDevice = (device) => {
     setValues({ ...values, device: device });
     setError({ ...error, device: "" });
-    setToggle(!isToggled);
+    setDropdown(!dropdown);
   };
 
   const handleClickOutside = (event) => {
@@ -104,7 +126,7 @@ function RequestForm(props) {
       dropDownButtonRef.current &&
       !dropDownButtonRef.current.contains(event.target)
     ) {
-      setToggle(false);
+      setDropdown(false);
     }
   };
 
@@ -123,172 +145,195 @@ function RequestForm(props) {
   }, [selectedRequest]);
 
   return (
-    <>
-      <form
-        className="no_selection h-full relative p-6 flex flex-col items-center gap-2 justify-between bg-white"
-        onSubmit={handleSubmit}
+    <motion.form
+      variants={popUp}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="relative flex max-w-md flex-col items-center justify-between gap-4 rounded-lg bg-white p-6 shadow-sm"
+      onSubmit={handleSubmit}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {!openSelectedRequest ? (
+        <motion.h1
+          variants={popUpItem}
+          className="mb-4 text-center text-2xl font-black text-cyan-500"
+        >
+          Repair Requisition Form
+        </motion.h1>
+      ) : (
+        <motion.h1
+          variants={popUpItem}
+          className="mb-4 text-center text-2xl font-black text-cyan-500"
+        >
+          {selectedRequest.requestId}
+        </motion.h1>
+      )}
+
+      <motion.div
+        variants={popUpItem}
+        className="relative w-full text-gray-500 "
       >
-        {!openSelectedRequest ? (
-          <h1 className="mb-4 font-black text-2xl text-blue-500">
-            Repair Requisition Form
-          </h1>
-        ) : (
-          <div>
-            <h1 className="mb-4 font-black text-2xl text-blue-500">
-              {selectedRequest.requestId}
-            </h1>
-          </div>
-        )}
-        <div className="w-full flex gap-4">
-          <FormInput
-            label="End-user"
-            name="name"
-            type="text"
-            value={values.name}
-            placeholder="Name"
-            error={error.name}
-            onChange={handleOnChange}
-          />
-          <FormInput
-            label="Position"
-            name="position"
-            type="text"
-            value={values.position}
-            placeholder="Position"
-            error={error.position}
-            onChange={handleOnChange}
-          />
+        <p className="mb-1 w-full text-xs font-medium text-gray-400 ">
+          Equipment Type
+        </p>
+        <div
+          ref={dropDownButtonRef}
+          className={`flex place-items-center justify-between rounded-md border p-2 ${
+            !values.device ? "text-gray-400" : ""
+          }`}
+          onClick={() => setDropdown(!dropdown)}
+          style={{ cursor: !selectedRequest ? "pointer" : "auto" }}
+        >
+          <span>{!values.device ? "Select a device" : values.device}</span>
+          {!selectedRequest && <FaChevronDown />}
         </div>
-
-        <div className="w-full relative text-gray-500 transition-all duration-500">
-          <p className="mb-2 text-gray-400 font-medium">Equipment Type</p>
-          <div
-            ref={dropDownButtonRef}
-            className="p-2 flex place-items-center justify-between bg-gray-200 hover:bg-gray-300 cursor-pointer rounded-md border transition duration-300 "
-            onClick={() => setToggle(!isToggled)}
-            // onMouseDown={() => setToggle(false)}
-          >
-            <span>{!values.device ? "Select a device" : values.device}</span>
-            <FaChevronDown />
-          </div>
-          <ul
-            ref={dropDownContentRef}
-            className={`absolute -z-10 w-full opacity-0 overflow-hidden bg-gray-50 rounded-md transition-all duration-300 ${
-              isToggled && !selectedRequest && "z-10 opacity-100 mt-4 border"
-            }`}
-          >
-            {devices.map((device, index) => (
-              <li
-                key={index}
-                className="p-2 bg-gray-50 hover:bg-gray-200 cursor-pointer  transition-all duration-300 "
-                onClick={() => handleSelectDevice(device)}
+        <AnimatePresence>
+          {dropdown && !selectedRequest && (
+            <motion.ul
+              variants={dropdownAnimation}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              ref={dropDownContentRef}
+              className={`absolute mt-4 w-full overflow-hidden rounded-md bg-black/5 backdrop-blur-2xl`}
+            >
+              {devices.map((device, index) => (
+                <motion.li
+                  variants={popUpItem}
+                  key={index}
+                  className="cursor-pointer p-2 hover:bg-gray-400/50"
+                  onClick={() => handleSelectDevice(device)}
+                >
+                  {device}
+                </motion.li>
+              ))}
+              <motion.li
+                variants={popUpItem}
+                className="cursor-pointer  hover:bg-gray-400/20 "
               >
-                {device}
-              </li>
-            ))}
-          </ul>
-          {error.device && (
-            <span className="w-full text-start text-sm text-red-500">
-              {error.device}
-            </span>
+                <input
+                  name="device"
+                  className="w-full bg-transparent p-2 outline-none placeholder:text-gray-500"
+                  type="text"
+                  placeholder="If other, please specify here"
+                  onChange={handleOnChange}
+                />
+              </motion.li>
+            </motion.ul>
           )}
-        </div>
+        </AnimatePresence>
 
-        <div className="w-full flex gap-4">
-          <FormInput
-            label="Brand"
-            name="brand"
-            type="text"
-            value={values.brand}
-            placeholder="Brand"
-            error={error.brand}
-            onChange={handleOnChange}
-          />
-          <FormInput
-            label="Model"
-            name="model"
-            type="text"
-            value={values.model}
-            placeholder="Model"
-            error={error.model}
-            onChange={handleOnChange}
-          />
-        </div>
+        {error.device && (
+          <span className="w-full text-start text-sm text-red-500">
+            {error.device}
+          </span>
+        )}
+      </motion.div>
+
+      <div className="flex w-full gap-4">
         <FormInput
-          label="Serial no."
-          name="serial"
+          label="Brand"
+          name="brand"
           type="text"
-          value={values.serial}
-          placeholder="Serial number"
+          value={values.brand}
+          placeholder="Brand"
+          error={error.brand}
+          onChange={handleOnChange}
+        />
+        <FormInput
+          label="Model"
+          name="model"
+          type="text"
+          value={values.model}
+          placeholder="Model"
           error={error.model}
           onChange={handleOnChange}
         />
-        <FormInput
-          label="Property no."
-          name="property"
-          type="text"
-          value={values.property}
-          placeholder="Property number"
-          error={error.property}
+      </div>
+      <FormInput
+        label="Serial no."
+        name="serial"
+        type="text"
+        value={values.serial}
+        placeholder="Serial number"
+        error={error.model}
+        onChange={handleOnChange}
+      />
+      <FormInput
+        label="Property no."
+        name="property"
+        type="text"
+        value={values.property}
+        placeholder="Property number"
+        error={error.property}
+        onChange={handleOnChange}
+      />
+      <div className="w-full">
+        <motion.p
+          variants={popUpItem}
+          className="mb-1 text-xs font-medium text-gray-400"
+        >
+          Defects/Complaints
+        </motion.p>
+        <motion.textarea
+          variants={popUpItem}
+          className="w-full rounded-md border p-2 text-gray-500 outline-none "
+          name="complaints"
+          value={values.complaints}
+          placeholder="If there is any other relevant information you think might be helpful for our admin team to know, please include it here."
+          rows={7}
           onChange={handleOnChange}
-        />
-        <div className="w-full mb-6">
-          <p className="mb-2 text-gray-400 font-medium">Defects/Complaints</p>
-          <textarea
-            className="w-full p-2 rounded-md border text-gray-500 bg-gray-100 hover:bg-gray-200 outline-none transition duration-150 ease-in-out"
-            name="complaints"
-            value={values.complaints}
-            placeholder="If there is any other relevant information you think might be helpful for our admin team to know, please include it here. This could include specific actions you have taken to troubleshoot the problem or any other details you think may help to resolve the issue."
-            rows={8}
-            onChange={handleOnChange}
-          ></textarea>
-          <span className="w-full text-start text-sm text-red-500">
-            {error.complaints}
-          </span>
+        ></motion.textarea>
+        <span className="w-full text-start text-sm text-red-500">
+          {error.complaints}
+        </span>
+      </div>
+      {/* If user request is clicked, form close button is rendered on the top right corner */}
+      {/* Else cancel button is checked if props is set to true then render  */}
+      {openSelectedRequest ? (
+        <motion.button
+          variants={popUpItem}
+          className="absolute right-0 top-0 p-3 text-gray-400 hover:text-gray-500"
+          onClick={closeForm}
+          type="button"
+        >
+          <IoCloseCircle size={32} />
+        </motion.button>
+      ) : (
+        <div className="flex w-full gap-4">
+          {cancelButton && (
+            <Button
+              secondary
+              width="full"
+              rounded="md"
+              buttonText="Cancel"
+              onClick={closeForm}
+            />
+          )}
+          <Button
+            primary
+            width="full"
+            rounded="md"
+            type="submit"
+            buttonText="Submit"
+          />
         </div>
-        {/* If user request is clicked, form close button is rendered on the top right corner */}
-        {/* Else cancel button is checked if props is set to true then render  */}
-        {openSelectedRequest ? (
-          <button
-            className="absolute top-0 right-0 p-3 text-gray-400 hover:text-gray-500 transition-all duration-300 ease-in-out"
-            onClick={closeForm}
-            type="button"
-          >
-            <IoCloseCircle size={32} />
-          </button>
-        ) : (
-          <div className="w-full flex gap-4">
-            {cancelButton && (
-              <button
-                className="w-full px-5 py-2 rounded-md text-white bg-gray-500 hover:bg-gray-600 transition-all duration-300 ease-in-out"
-                type="button"
-                onClick={closeForm}
-              >
-                Cancel
-              </button>
-            )}
-            <button
-              className="w-full px-5 py-2 rounded-md text-white bg-blue-500 hover:bg-blue-600 transition-all duration-300 ease-in-out"
-              type="submit"
-            >
-              Submit
-            </button>
-          </div>
-        )}
-        {/* Status */}
-        {openSelectedRequest && (
-          <div
-            className={`px-4 py-1 rounded-full font-bold text-white ${
-              selectedRequest.status === "Pending"
-                ? "bg-yellow-500"
-                : "bg-green-500"
-            } `}
-          >
-            {selectedRequest.status}
-          </div>
-        )}
-      </form>
-    </>
+      )}
+      {/* Status */}
+      {openSelectedRequest && (
+        <motion.div
+          variants={popUpItem}
+          className={`w-full rounded-md px-4 py-2 text-center font-bold text-white ${
+            selectedRequest.status === "Pending"
+              ? "bg-yellow-500"
+              : "bg-green-500"
+          } `}
+        >
+          {selectedRequest.status}
+        </motion.div>
+      )}
+    </motion.form>
   );
 }
 

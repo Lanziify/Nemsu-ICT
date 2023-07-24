@@ -16,8 +16,7 @@ export default function getTimeAgo(createdAt) {
     return `${hours}h ago`;
   } else if (minutes > 0) {
     return `${minutes}m ago`;
+  } else {
+    return "now";
   }
-  //  else {
-  //   return `${seconds} s`;
-  // }
 }

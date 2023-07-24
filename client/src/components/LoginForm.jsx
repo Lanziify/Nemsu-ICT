@@ -3,6 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import validateLogin from "../utils/validateLogin";
 import FormInput from "./FormInput";
 import logo from "../assets/logo.png";
+import Button from "./Button";
 
 function LoginForm() {
   const [values, setValues] = useState({
@@ -23,7 +24,6 @@ function LoginForm() {
   async function handleSubmit(e) {
     e.preventDefault();
     const formErrors = validateLogin(values);
-    console.log(formErrors)
     if (Object.keys(formErrors).length > 0) {
       setError(formErrors);
     } else {
@@ -38,11 +38,11 @@ function LoginForm() {
   return (
     <>
       <form
-        className="w-1/3 flex flex-col items-center gap-4 px-8 pt-6 pb-8 bg-white border rounded-md shadow-sm"
+        className="flex w-1/3 flex-col items-center gap-4 rounded-md border bg-white px-8 pb-8 pt-6 shadow-sm"
         onSubmit={handleSubmit}
       >
         <img className="max-h-20 rounded-full" src={logo} />
-        <span className="font-bold text-lg text-gray-500">
+        <span className="text-lg font-bold text-gray-500">
           Log in to your account
         </span>
         {firebaseError && <span className="text-red-500">{firebaseError}</span>}
@@ -63,12 +63,13 @@ function LoginForm() {
           onChange={handleOnChange}
         />
         <span className="text-gray-400">Forgot password?</span>
-        <button
-          className="w-full px-5 py-2 rounded-md text-white bg-blue-500 hover:bg-blue-400 transition duration-150 ease-in-out"
+        <Button
+          primary
+          width="full"
+          rounded="md"
+          buttonText="Sign in"
           type="submit"
-        >
-          Login
-        </button>
+        />
       </form>
     </>
   );

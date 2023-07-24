@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json())
 
 
-app.use('/api/user', require('./routes/userRoutes'))
+app.use('/api/dto/', require('./routes/apiRoutes'))
 
 app.listen(PORT, () => {
   console.log(`Server is running on port: ${PORT}`);

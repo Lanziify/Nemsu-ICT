@@ -1,14 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-* {
+html {
+  overflow-y: scroll;
+}
+/* * {
   margin: 0;
   padding: 0;
-  -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-  -moz-box-sizing: border-box; /* Firefox, other Gecko */
-  box-sizing: border-box; /* Opera/IE 8+ */
-}
+  height: 100vh;
+  width: 100vw;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+} */
 
 div.no_selection,
 form.no_selection {
@@ -123,7 +127,7 @@ body {
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 button {

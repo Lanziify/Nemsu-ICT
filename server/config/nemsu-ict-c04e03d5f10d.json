@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "nemsu-ict",
+  "private_key_id": "c04e03d5f10d0961bf6178fedbb8f1dca93a5dc3",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC1frdk4z/bdpY0\nWPW0sx/Jt0V3s6XEAXyqnqa0jjGvb62N5g3yWNMcgDoQU7jEtX+iHiPP+shpO05H\n73RU66QmiCI0mFdCDPpJDJVpISBz/rhzFB0DZc8pvgclVsx+/81ZfsPh0295wCvj\n8oehcLGxuGv6wf1j6D+A07ZasppqAQVbtRo+TMIKxgiuAcMwJ7WclNGJoYxm621s\nF6L927CksptMi1oaO4bGDpL9kWrlSmSNv1P4LWQ57zns9FPUPzJy9U+Hd7dgkjsr\ndv/olW1ygHHG6sHxca7Co0uJfZ+79w5y7cc34xTbxHdU9NL1KkMSRQhNVGLGqMtc\ny7HJR0YzAgMBAAECggEAFIUc07bvIQSvBit0rux9penRsdn0M6KovLBZUBqvkBKZ\nVcIdRjmNYjCL4A1chj5bDYeeLEVCDsZvcFSoxh0qSaz56RERnzHRGRySG/kXLpDY\nZofEoVNhG8AUwL+n4/KkqKoGGEHhMwEWNUcrgduNoPalRrb+IM3ruB4NBQN3z+TY\nCM/dD/K7pTqcRijuDhsSL0KgeE0JT9vn8CDns+FdcTSDoC2sctqTL5jT0+Mibk06\ni2fZ7YJXn0HOnvinTIwIQ5UY8sLHYZAPdbY0Z3ZfDKo0HFBD3aKk+Np1reQlBjlo\nz2BWkgd0Q+IgTbgckMr7lFVOH8f5JHHXXnZt6IBGcQKBgQDsq+P97iPCpc3HnEra\nBI7dhKIrZFuspA4G29P0V5mXyMJ04U1DTgj8rDgm2f6g8Llm/9Rox4CYoF/tIc75\nqFlj3CoY8oxoKI5y9DhNFbWG1c8Xp4Lvv7U05YM1nDORGgPy7yZT1kQ3oqwrqrA4\nKQYXD+HiRci2XcoUiyFxTtE8ewKBgQDEUT85XT0J8eBrsxxr1ct7zOyogkwSYTh0\n/hRa9HzDMPoyw4GN00pvTsFg7oeeUNklhIeQ42+jYvfiqk2MBPjWuLKGzIe7pXDR\nxVXdnnWWAcaYoLkEg2S+14Nudw47X3kWz9oWEtXeRViwdnbIn/TlN9Pp6RHR9kUd\nGRMBKcI7qQKBgAMWbwAGFlNYxGmBQXy8qHx9WXxFb+i9ry0puwcqCWfwh5Dsy4xA\nPV/Gg2kGWQsSeOi+F7BSQfw7w2Sdl0yshJYH7kirCWfmd41KYF2pFdgve+csGUo1\nbxDEmcSeSBHxi/GkaxSW7AbpyWM8c9YXuuucGm9QR8ERUiyYcBRBWft3AoGAWOj2\n+lLo3wUlf4FZ4Nit1H7Fu7dvHm/bctjTfTH3Ayu+VJlIpmPH9Us0t2KwFxpEjgJM\np2jp2ZRr8cLxZfWmgRCbAgPFgU13H/oAXmNym6JoQB2iTZH4YZoXU0MmNeuSWqt9\n+LtFEupTNXAhcdFHxzwWhHxi7rVbLcd6XO99oSkCgYEAhJ+1/KY3ztDJcKd08bAM\nz6kId9oXTz5ZlFk9JTiCNZ/yMrR96YbbPM2YQuYpU/B3OCQubYMHkE+73DnVE1gu\nyGGxg30WlIZluJfe6nmfBeSbdhywoxKVaAQX0K1ek6XEb4zAxgh2yBFnC2D0cPOK\nZnOqJVUjx6hEdTA2/vWfILk=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-8ifvn@nemsu-ict.iam.gserviceaccount.com",
+  "client_id": "112073875766909683394",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-8ifvn%40nemsu-ict.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

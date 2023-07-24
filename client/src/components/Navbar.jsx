@@ -1,22 +1,38 @@
 import React, { useState, useEffect, useRef } from "react";
+import { baseURL } from "../utils/api";
+import axios from "axios";
 import {
   IoMenu,
   IoPersonCircle,
   IoSettingsOutline,
   IoHelpCircleOutline,
   IoLogOutOutline,
+  IoNotificationsOutline,
 } from "react-icons/io5";
 import { BsChatLeftDots } from "react-icons/bs";
 import { NavLink } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { useAuth } from "../contexts/AuthContext";
+import Button from "./Button";
+import RequestNotification from "./RequestNotification";
+import { getToken, deleteToken, onMessage } from "firebase/messaging";
+import { messaging } from "../config/firebase-config";
+import { toast } from "react-toastify";
+import notificationRingtone from "../assets/notification.mp3";
+import { AnimatePresence, motion } from "framer-motion";
+import { fadeDefault, popUp, popUpItem } from "../animations/variants";
 
 function Navbar(props) {
-  const { toggleDrawer } = props;
-  const { user, logoutUser } = useAuth();
-  const [isToggled, setIsToggled] = useState(false);
-  const profileFloaterRef = useRef(null);
-  const profileButtonRef = useRef(null);
+  const { user, userProfile, logoutUser } = useAuth();
+  const { toggleDrawer, isCreatingRequest } = props;
+  const [requestNotification, setRequestNotification] = useState([]);
+  const [unreadNotifications, setUnreadNotifications] = useState();
+  const [isProfileToggled, setIsProfileToggled] = useState(false);
+  const [isNotificationToggled, setIsNotificationToggled] = useState(false);
+  const notificationButton = useRef(null);
+  const notificationFloater = useRef(null);
+  const profileButton = useRef(null);
+  const profileFloater = useRef(null);
 
   const items = [
     {
@@ -44,87 +60,235 @@ function Navbar(props) {
     }
   }
 
-  const handleClickOutside = (event) => {
-    if (
-      profileFloaterRef.current &&
-      !profileFloaterRef.current.contains(event.target) &&
-      profileButtonRef.current &&
-      !profileButtonRef.current.contains(event.target)
-    ) {
-      setIsToggled(false);
+  const fetchNotifications = async () => {
+    try {
+      const notifications = await axios.get(`${baseURL}/notification/request`);
+      setRequestNotification(notifications.data.notification);
+      const unread = notifications.data.notification.filter(
+        (notification) => notification.read === false
+      ).length;
+      setUnreadNotifications(unread);
+    } catch (error) {
+      console.log(error);
     }
   };
 
+  const requestPermission = async () => {
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      const token = await getToken(messaging, {
+        vapidKey:
+          "BItYMIPmv1rk5OeMPmz2__C1LaALFQZs-eRDr0JojHd8Hj3PyelNHMz5xzGgH-j1jRLecKyMVDP_wiRceSQvbDo",
+      });
+      await axios.put(`${baseURL}/fcm`, { uid: user.uid, fcmToken: token });
+    } else {
+      await deleteToken(messaging);
+      await axios.put(`${baseURL}/fcm`, { uid: user.uid, fcmToken: null });
+    }
+  };
+
+  const ToastifyNotification = ({ title, body }) => (
+    <div className="flex items-center gap-4">
+      <img className="max-h-16 rounded-full" src={logo} />
+      <div>
+        <h1 className="font-bold">{title}</h1>
+        <p className="text-sm">{body}</p>
+      </div>
+    </div>
+  );
+
   useEffect(() => {
-    const mouseDown = document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
-    return mouseDown;
+    requestPermission();
+    try {
+      onMessage(messaging, (payload) => {
+        toast(
+          <ToastifyNotification
+            title={payload.data.title}
+            body={payload.data.subtitle}
+          />,
+          {
+            position: "bottom-right",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          }
+        );
+        if (userProfile.claims.admin) {
+          fetchNotifications();
+        }
+        const ringtone = new Audio(notificationRingtone);
+        ringtone.play();
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }, []);
 
-  return (
-    <nav className="no_selection fixed w-full z-10 flex px-6 justify-between text-sm text-gray-500 border-b bg-gray-50">
-      <div className="py-2 flex gap-6 items-center">
-        <button
-          className="p-2 rounded-full  hover:bg-gray-200 cursor-pointer transition-all duration-300 ease-in-out "
-          onClick={toggleDrawer}
-        >
-          <IoMenu size={24} />
-        </button>
-        <div className="flex gap-2 items-center">
-          <img className="max-h-8 rounded-full" src={logo} />
-          <span className="font-bold">NEMSU - Tagbina Campus</span>
-        </div>
-      </div>
-      <div className="flex place-items-center ">
-        {/* Profile Button */}
-        <div className="relative flex flex-col place-items-center">
-          <button
-            ref={profileButtonRef}
-            className="rounded-full text-blue-500"
-            onClick={() => setIsToggled(!isToggled)}
-          >
-            <IoPersonCircle size={36} />
-          </button>
+  useEffect(() => {
+    if (userProfile.claims.admin) {
+      fetchNotifications();
+    }
+  }, []);
 
-          {/* Profile floater */}
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        isNotificationToggled &&
+        notificationButton.current &&
+        notificationFloater.current &&
+        !notificationButton.current.contains(e.target) &&
+        !notificationFloater.current.contains(e.target)
+      ) {
+        setIsNotificationToggled(false);
+      }
+
+      if (
+        profileFloater.current &&
+        !profileFloater.current.contains(e.target) &&
+        profileButton.current &&
+        !profileButton.current.contains(e.target)
+      ) {
+        setIsProfileToggled(false);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [isNotificationToggled, isProfileToggled]);
+
+  return (
+    <nav className="no_selection sticky top-0 z-10 min-h-[56px] bg-white text-sm text-gray-500 shadow-sm">
+      {/* Left side div */}
+      <div className="mx-auto flex max-w-7xl justify-between px-4 py-2">
+        <div className="flex items-center gap-4">
           <div
-            ref={profileFloaterRef}
-            className={`absolute -z-10 w-64 right-0 top-full opacity-0 overflow-hidden bg-gray-50 rounded-md transition-all duration-200 ${
-              isToggled ? "z-10 opacity-100 mt-6 border visible" : "invisible"
-            }`}
+            className="cursor-pointer rounded-full p-2 transition-all duration-300 ease-in-out hover:bg-gray-200 "
+            onClick={toggleDrawer}
           >
-            <div className="p-4">
-              <img className="max-h-16 m-auto mb-2 rounded-full" src={logo} />
-              <p className="mb-2 text-center">{user.email}</p>
-              <button className="w-full py-1 border rounded-md hover:bg-gray-200 transition-all duration-300">
-                Manage Profile
-              </button>
-            </div>
-            <hr />
-            <div className="py-2">
-              {items.map((item, index) => (
-                <NavLink
-                  key={index}
-                  to={item.path}
-                  className="px-4 py-2 flex place-items-center gap-4 bg-gray-50 hover:bg-gray-200 cursor-pointer"
-                >
-                  <div>{item.icon}</div>
-                  <div>{item.name}</div>
-                </NavLink>
-              ))}
-            </div>
-            <hr />
-            <div className="p-4">
-              <button
-                className="w-full py-2 flex justify-center items-center gap-2 rounded-md text-white bg-red-500 hover:bg-red-600 transition duration-150 ease-in-out"
-                onClick={handleLogout}
+            <IoMenu size={24} />
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-[36px] min-w-[36px] rounded-full border bg-gradient-to-br from-cyan-100 to-cyan-500"></div>
+            {/* <img className="max-h-[36px] bg-gray-400 rounded-full" src={logo} /> */}
+            <span className="font-bold">Digital Transformation Office</span>
+          </div>
+        </div>
+
+        {/* Right side div */}
+        <div className=" flex items-center gap-4">
+          {/* Notification */}
+          <div className="relative flex h-full">
+            <button
+              ref={notificationButton}
+              onClick={() => setIsNotificationToggled(!isNotificationToggled)}
+            >
+              <IoNotificationsOutline size={24} />
+            </button>
+            {unreadNotifications ? (
+              <div
+                className="no_selection absolute -right-1 top-0 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-cyan-500 p-1 text-[10px] text-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsNotificationToggled(!isNotificationToggled);
+                }}
               >
-                <IoLogOutOutline size={24} />
-                Logout
-              </button>
-            </div>
+                {unreadNotifications}
+              </div>
+            ) : null}
+            {/* Notification floater */}
+            <AnimatePresence>
+              {isNotificationToggled && (
+                <motion.div
+                  variants={fadeDefault}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  ref={notificationFloater}
+                  className="absolute right-0 top-full -z-10 mt-3 flex w-[360px] flex-col overflow-hidden rounded-md border bg-white/70 p-4  backdrop-blur-md"
+                >
+                  <motion.h1
+                    variants={popUpItem}
+                    className="text-2xl font-bold text-gray-500"
+                  >
+                    Notifications
+                  </motion.h1>
+                  <RequestNotification notifications={requestNotification} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          {/* Create request button */}
+          {!userProfile.claims.admin && (
+            <Button
+              primary
+              rounded="md"
+              buttonText="Create a request"
+              onClick={isCreatingRequest}
+            />
+          )}
+          {/* Profile */}
+          <div className="relative flex">
+            <button
+              ref={profileButton}
+              className="rounded-full text-cyan-500"
+              onClick={() => setIsProfileToggled(!isProfileToggled)}
+            >
+              <IoPersonCircle size={36} />
+            </button>
+
+            {/* Profile floater */}
+            <AnimatePresence>
+              {isProfileToggled && (
+                <motion.div
+                  variants={fadeDefault}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  ref={profileFloater}
+                  className="absolute right-0 top-full -z-10 mt-3 min-w-[280px] overflow-hidden rounded-md border bg-white/70 p-4  backdrop-blur-md"
+                >
+                  <div className="mb-2">
+                    <img
+                      className="m-auto mb-2 max-h-16 rounded-full"
+                      src={logo}
+                    />
+                    <p className="mb-2 text-center">{user.email}</p>
+                    <Button
+                      width="full"
+                      rounded="md"
+                      buttonText="Manage profile"
+                    />
+                  </div>
+                  <div className="py-2">
+                    {items.map((item, index) => (
+                      <NavLink
+                        key={index}
+                        to={item.path}
+                        className="flex cursor-pointer place-items-center gap-4 rounded-md px-4 py-2 font-semibold  hover:bg-gray-300/50"
+                      >
+                        <div>{item.icon}</div>
+                        <p>{item.name}</p>
+                      </NavLink>
+                    ))}
+                  </div>
+                  <hr />
+                  <a
+                    className="mt-2 flex cursor-pointer place-items-center gap-4 rounded-md px-4 py-2 font-semibold  hover:bg-gray-300/50"
+                    onClick={handleLogout}
+                  >
+                    <IoLogOutOutline size={24} />
+                    <p>Logout</p>
+                  </a>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

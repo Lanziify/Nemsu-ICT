@@ -1,15 +1,12 @@
 export default function validateFields(values) {
   const errorMessage = {};
+  const deviceRegex = /^[a-zA-Z]+$/;
+
   // Request form validations
-  if (!values.name) {
-    errorMessage.name = "Name is required.";
-  }
-  if (!values.position) {
-    errorMessage.position = "Please enter your position.";
-  }
-  if (!values.device) {
-    errorMessage.device = "Please specify the type of your device.";
-  }
+  // if (!values.device || !deviceRegex.test(values.device)) {
+  //   errorMessage.device = "Please specify the type of your device.";
+  // }
+
   if (!values.brand) {
     errorMessage.brand = "Dont forget the brand of your device.";
   }

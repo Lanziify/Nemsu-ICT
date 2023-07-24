@@ -1,71 +1,66 @@
-import React, { useState } from "react";
-import { NavLink, json } from "react-router-dom";
-import {
-  MdOutlineHome,
-  MdHome,
-  MdOutlineCreate,
-  MdCreate,
-  MdOutlineRefresh,
-  MdRefresh,
-  MdCheckCircleOutline,
-  MdCheckCircle,
-} from "react-icons/md";
+import React, { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { drawerAnimation, drawerItems } from "../animations/variants";
+import { adminItems, userItems } from "../utils/MenuItems";
 
 function Sidebar(props) {
-  const { isToggled, setOpenSideBar } = props;
-  const [selected, setSelected] = useState();
+  const { isAdmin, isToggled } = props;
+  const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 960);
 
-  const menuItems = [
-    {
-      path: "/home",
-      name: "Home",
-      icon: <MdHome size={24} />,
-    },
-    {
-      path: "/request",
-      name: "Request",
-      icon: <MdCreate size={24} />,
-    },
-    {
-      path: "/ongoing",
-      name: "Ongoing",
-      icon: <MdRefresh size={24} />,
-    },
-    {
-      path: "/completed",
-      name: "Completed",
-      icon: <MdCheckCircle size={24} />,
-    },
-  ];
+  const menuItems = () => {
+    if (isAdmin) {
+      return adminItems;
+    } else {
+      return userItems;
+    }
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setShowSidebar(window.innerWidth >= 960);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <>
-      <div
-        className={`no_selection bg-gray-50 transition-all ease-in-out duration-300 ${
-          isToggled ? "w-72 visible border-r" : "w-0 invisible"
-        } `}
-      >
-        <div className="px-5 py-3 text-sm overflow-hidden">
-          {menuItems.map((item, index) => (
-            <NavLink
-              to={item.path}
-              key={index}
-              className={({ isActive }) => {
-                return (
-                  "flex gap-2 p-2 items-center rounded-md transition-all duration-200 ease-in-out " +
-                  (isActive
-                    ? `bg-blue-200 text-blue-500`
-                    : "hover:bg-gray-200 text-gray-500")
-                );
-              }}
-              onClick={() => setOpenSideBar(true)}
-            >
-              <div>{item.icon}</div>
-              <div>{item.name}</div>
-            </NavLink>
-          ))}
-        </div>
-      </div>
+      {showSidebar && isToggled && (
+        <aside>
+          <div className="sticky top-[72px] my-4 ml-4 flex min-h-[calc(100vh_-_92px)] w-[280px] flex-col justify-between overflow-hidden rounded-md bg-white p-4 text-sm  text-gray-500 shadow-sm">
+            <div>
+              {menuItems().map((item, index) => (
+                <motion.div variants={drawerItems} key={index}>
+                  <NavLink
+                    to={item.path}
+                    key={index}
+                    className={({ isActive }) => {
+                      return (
+                        "flex items-center gap-2 rounded-md p-2 font-medium transition-all " +
+                        (isActive
+                          ? `bg-cyan-500/10 text-cyan-500`
+                          : "hover:bg-gray-500/10")
+                      );
+                    }}
+                  >
+                    <div>{item.icon}</div>
+                    <div>{item.name}</div>
+                  </NavLink>
+                </motion.div>
+              ))}
+            </div>
+
+            <footer className="text-center text-xs">
+              © 2023 North Eastern Mindanao State University - Tagbina Campus
+            </footer>
+          </div>
+        </aside>
+      )}
     </>
   );
 }

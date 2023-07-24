@@ -3,26 +3,69 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import { ToastContainer } from "react-toastify";
+import ModalBackdrop from "../components/ModalBackdrop";
+import { AnimatePresence, motion } from "framer-motion";
+import "react-toastify/dist/ReactToastify.css";
+import { fadeDefault } from "../animations/variants";
+import RequestForm from "../components/RequestForm";
+import MenuDrawer from "../components/MenuDrawer";
 
 function ProtectedRoutes({ allowedUser }) {
   const { user, userProfile } = useAuth();
   const [isToggled, setIsToggled] = useState(true);
+  const [isCreatingRequest, setIsCreatingRequest] = useState(false);
 
   const handleDrawerToggle = () => {
     setIsToggled(!isToggled);
   };
 
-  const setOpenSideBar = (isOpen) => {
-    setIsToggled(isOpen);
+  const setOpenSideBar = (close) => {
+    setIsToggled(close);
+  };
+
+  const handleCreateRequest = () => {
+    setIsCreatingRequest(true);
   };
 
   return userProfile?.claims?.admin === allowedUser ? (
     <>
-      <Navbar toggleDrawer={handleDrawerToggle} />
-      <div className="flex pt-14">
-        <Sidebar isToggled={isToggled} setOpenSideBar={setOpenSideBar} />
-        <div className="flex-1 min-h-[calc(100vh_-_56px)] bg-gray-50">
-          <Outlet />
+      <div className="relative">
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+        <div className="over relative flex min-h-screen flex-col  bg-gray-100">
+          <Navbar
+            toggleDrawer={handleDrawerToggle}
+            isCreatingRequest={handleCreateRequest}
+          />
+          <AnimatePresence>
+            {isCreatingRequest && (
+              <ModalBackdrop onClick={() => setIsCreatingRequest(false)}>
+                <RequestForm user={user} />
+              </ModalBackdrop>
+            )}
+          </AnimatePresence>
+          <div className="relative mx-auto flex w-full max-w-7xl flex-1">
+            <Sidebar isToggled={isToggled} isAdmin={userProfile.claims.admin} />
+            <MenuDrawer
+              isToggled={isToggled}
+              isAdmin={userProfile.claims.admin}
+              isMenuActive={setOpenSideBar}
+            />
+            <main className="w-full">
+              <Outlet />
+            </main>
+          </div>
         </div>
       </div>
     </>

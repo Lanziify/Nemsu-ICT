@@ -5,13 +5,13 @@ import logo from "../assets/logo.png";
 
 export default function Header() {
   return (
-    <nav className="no_selection flex px-6 justify-between text-gray-500">
-      <div className="py-2 flex gap-2 items-center">
+    <nav className="no_selection flex justify-between px-6 text-gray-500">
+      <div className="flex items-center gap-2 py-2">
         <img className="max-h-8 rounded-full" src={logo} />
         <span className="font-bold">NEMSU - Tagbina Campus</span>
       </div>
-      <div className="py-4 flex gap-4">
-        <NavLink to={'/'}>Home</NavLink>
+      <div className="flex gap-4 py-4">
+        <NavLink to={"/"}>Home</NavLink>
         <Link href="about">About</Link>
         <NavLink>Contact Us</NavLink>
       </div>
