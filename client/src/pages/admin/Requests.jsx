@@ -27,7 +27,7 @@ export default function Requests() {
 
   return (
     <div className="p-4">
-      <div className="rounded-md h-full p-4 bg-white text-sm text-gray-500 shadow-sm">
+      <div className="rounded-md h-full bg-white text-sm text-gray-500 sm:max-md:bg-transparent sm:max-md:shadow-none shadow-sm">
         <RequestList
           list={searchRequests}
           requestId

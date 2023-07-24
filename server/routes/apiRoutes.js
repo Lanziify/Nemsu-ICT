@@ -8,6 +8,7 @@ const {
   getAllRequest,
   getUserRequests,
   getRequestNotification,
+  getRequisitionResponseNotification,
   updateFcmToken,
   respondUserRequest,
   setAdmin,
@@ -20,9 +21,10 @@ router.route("/users").get(getAllUsers);
 router.route("/requests").get(getAllRequest);
 router.route("/request/:id").get(getUserRequests);
 router.route("/notification/request").get(getRequestNotification);
+router.route("/notification/:id").get(getRequisitionResponseNotification);
 
 router.route("/admin/:id").put(setAdmin);
 router.route("/fcm").put(updateFcmToken);
-router.route("/:id").put(respondUserRequest);
+router.route("/request/:id").put(respondUserRequest);
 
 module.exports = router;

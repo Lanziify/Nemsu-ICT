@@ -118,7 +118,7 @@ function RequestList(props) {
               ? ""
               : (request[item.data] === "Pending" && "text-yellow-500") ||
                 (request[item.data] === "Accepted" && "text-green-500")
-          } before:font-bold sm:max-md:flex sm:max-md:justify-between sm:max-md:border-b sm:max-md:px-0 sm:max-md:py-2 sm:max-md:before:content-[attr(cell)] sm:max-md:last:border-0`}
+          } before:font-bold sm:max-md:flex sm:max-md:justify-between sm:max-md:px-0 sm:max-md:py-1 sm:max-md:before:content-[attr(cell)]`}
           key={index}
         >
           {item.data != "createdAt"
@@ -148,7 +148,7 @@ function RequestList(props) {
               {sortedUserRequests.map((request, index) => (
                 <tr
                   key={index}
-                  className="overflow-hidden rounded-xl  sm:max-md:block sm:max-md:border sm:max-md:bg-gray-50 sm:max-md:p-4"
+                  className="overflow-hidden rounded-md  sm:max-md:block sm:max-md:border sm:max-md:bg-white sm:max-md:p-4"
                 >
                   {headerItems.map((item, index) =>
                     tableData(item, request, index)
