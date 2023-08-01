@@ -3,7 +3,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaCarrot, FaSignOutAlt } from "react-icons/fa";
 import logo from "../assets/logo.png";
 
-export default function Header() {
+export default function HeroHeader() {
   return (
     <nav className="no_selection flex justify-between px-6 text-gray-500">
       <div className="flex items-center gap-2 py-2">

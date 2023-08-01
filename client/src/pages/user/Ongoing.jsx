@@ -55,24 +55,20 @@ export default function Ongoing() {
 
   useEffect(() => {
     fetchRequests();
-    const interval = setInterval(fetchRequests, 5000);
-    return () => {
-      clearInterval(interval);
-    };
   }, []);
 
   return (
-    <div className="relative h-full p-4">
+    <div className="relative h-full shadow-sm">
       <motion.div
         variants={popUp}
         initial="initial"
         animate="animate"
         exit="exit"
-        className="rounded-md h-full bg-white text-sm text-gray-500"
+        className="h-full rounded-md bg-white p-6 text-sm text-gray-500"
       >
         <motion.div variants={popUpItem} className="overflow-hidden">
           {/* Request List Head */}
-          <div className="relative flex flex-col justify-center gap-6 p-6">
+          <div className="relative mb-6 flex flex-col justify-center gap-6">
             <div className="flex items-center gap-3 text-white">
               <motion.div
                 variants={popUpItem}
@@ -84,7 +80,7 @@ export default function Ongoing() {
                 variants={popUpItem}
                 className="text-4xl font-black text-cyan-500"
               >
-                Ongoing requests
+                My Requests
               </motion.h1>
             </div>
 
@@ -101,34 +97,21 @@ export default function Ongoing() {
                 onChange={handleSearch}
               />
             </motion.div>
-            {/* <Button
-                primary
-                rounded="full"
-                buttonText="New request"
-                iconEnd={<FaPlus />}
-                onClick={() => {
-                  setCreateNewRequest(true);
-                  setSelectedRequest({});
-                  setOpenRequest(false);
-                }}
-              /> */}
           </div>
 
           {/* Renders all the request into
           a div with all the fields that the user register
           in the firestore collection*/}
         </motion.div>
-        <div className="p-4">
-          <RequestList
-            list={data}
-            requestId
-            device
-            model
-            status
-            created
-            onClickHandler={handleOnClick}
-          />
-        </div>
+        <RequestList
+          list={data}
+          requestId
+          device
+          model
+          status
+          created
+          onClickHandler={handleOnClick}
+        />
       </motion.div>
       {/* This div will be render when state of createNewRequest and OpenRequest is true */}
       {/* <AnimatePresence>

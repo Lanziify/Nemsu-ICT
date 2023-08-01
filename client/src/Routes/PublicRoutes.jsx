@@ -1,12 +1,12 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import Header from "../components/Header";
+import HeroHeader from "../components/HeroHeader";
 
 function PublicRoutes() {
   const { user, userProfile } = useAuth();
   return !user ? (
     <>
-      <Header />
+      <HeroHeader />
       <Outlet />
     </>
   ) : userProfile?.claims?.admin ? (

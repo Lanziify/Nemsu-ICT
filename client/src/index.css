@@ -22,13 +22,13 @@ form.no_selection {
   -khtml-user-select: none; /* webkit (konqueror) browsers */
   -ms-user-select: none; /* IE10+ */
 }
-/* 
+
 .bg-nemsu {
   background-image: url('https://nemsu-tagbina.edu.ph/src/images/header/carousel-cover-slide-3.jpg');
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-} */
+}
 
 /* :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;

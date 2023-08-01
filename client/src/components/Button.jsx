@@ -1,4 +1,5 @@
 import React from "react";
+import { AiOutlineLoading } from "react-icons/ai";
 
 function Button(props) {
   const {
@@ -16,6 +17,7 @@ function Button(props) {
     iconStart,
     iconEnd,
     onClick,
+    disabled,
   } = props;
 
   const getRoundedClass = () => {
@@ -49,13 +51,26 @@ function Button(props) {
     return `bg-transparent text-gray-500 ${transition} hover:bg-gray-300/50`;
   };
 
-  const buttonClasses = `flex ${getWidthClass()} items-center justify-center gap-2 px-4 py-2 font-semibold ${getRoundedClass()} ${getVariantClass()} outline-none`;
+  const buttonClasses = `flex ${getWidthClass()} items-center justify-center gap-2 px-4 py-2 font-semibold ${getRoundedClass()} ${getVariantClass()} disabled:bg-gray-300 disabled:text-gray-400 outline-none`;
 
   return (
-    <button className={buttonClasses} type={type || "button"} onClick={onClick}>
-      {iconStart && iconStart}
-      {buttonText || "Button"}
-      {iconEnd && iconEnd}
+    <button
+      className={buttonClasses}
+      type={type || "button"}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {!disabled ? (
+        <>
+          {iconStart && iconStart}
+          {buttonText || "Button"}
+          {iconEnd && iconEnd}
+        </>
+      ) : (
+        <div className="animate-spin">
+          <AiOutlineLoading size={18} />
+        </div>
+      )}
     </button>
   );
 }

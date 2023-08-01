@@ -23,7 +23,7 @@ export const drawerAnimation = {
       stiffness: 100,
       mass: 0.1,
       delayChildren: 0,
-      staggerChildren: 0.1,
+      staggerChildren: 0.03,
     },
   },
   exit: {
@@ -33,7 +33,6 @@ export const drawerAnimation = {
       damping: 7.8,
       stiffness: 100,
       mass: 0.4,
-
     },
   },
 };
@@ -48,7 +47,6 @@ export const drawerItems = {
       damping: 7.8,
       stiffness: 100,
       mass: 0.22,
-      duration: 1
     },
   },
   exit: {
@@ -84,12 +82,38 @@ export const popUp = {
     y: 0,
     opacity: 1,
     transition: {
+      type: "spring",
+      damping: 7.8,
+      stiffness: 100,
+      mass: 0.32,
       delayChildren: 0,
       staggerChildren: 0.02,
     },
   },
   exit: {
     y: 40,
+    opacity: 0,
+  },
+};
+export const popUpRight = {
+  initial: {
+    x: 10,
+    opacity: 0,
+  },
+  animate: {
+    x: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      damping: 7.8,
+      stiffness: 100,
+      mass: 0.8,
+      delayChildren: 0,
+      staggerChildren: 0.08,
+    },
+  },
+  exit: {
+    x: 10,
     opacity: 0,
   },
 };
@@ -109,5 +133,22 @@ export const popUpItem = {
   exit: {
     opacity: 0,
     y: 40,
+  },
+};
+export const popUpItemRight = {
+  initial: { opacity: 0, x: 10 },
+  animate: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      type: "spring",
+      damping: 7.8,
+      stiffness: 100,
+      mass: 0.22,
+    },
+  },
+  exit: {
+    opacity: 0,
+    x: 10,
   },
 };

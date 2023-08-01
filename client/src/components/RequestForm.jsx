@@ -150,7 +150,7 @@ function RequestForm(props) {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="relative flex max-w-md flex-col items-center justify-between gap-4 rounded-lg bg-white p-6 shadow-sm"
+      className="relative flex max-w-md flex-col items-center justify-between gap-4 rounded-md bg-white p-6 shadow-xl"
       onSubmit={handleSubmit}
       onClick={(e) => e.stopPropagation()}
     >

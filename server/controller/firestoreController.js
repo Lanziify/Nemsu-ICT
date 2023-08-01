@@ -43,9 +43,9 @@ const createRequest = asyncHandler(async (req, res) => {
 })
 
 const respondUserRequest = asyncHandler(async (req, res) => {
-  const { data } = req.body
+  const { status } = req.body
   const requesId = req.params.id
-  const request = await firestoreModel.respondUserRequest(requesId, data)
+  const request = await firestoreModel.respondUserRequest(requesId, status)
   res.status(200).json({ request })
 })
 

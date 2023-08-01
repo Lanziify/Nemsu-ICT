@@ -31,8 +31,8 @@ function Sidebar(props) {
   return (
     <>
       {showSidebar && isToggled && (
-        <aside>
-          <div className="sticky top-[72px] my-4 ml-4 flex min-h-[calc(100vh_-_92px)] w-[280px] flex-col justify-between overflow-hidden rounded-md bg-white p-4 text-sm  text-gray-500 shadow-sm">
+        <aside className="">
+          <div className="sticky top-[72px] my-4 ml-4 flex min-h-[calc(100vh_-_88px)] w-[280px] flex-col justify-between overflow-hidden rounded-md bg-white p-4 text-sm  text-gray-500 shadow-sm">
             <div>
               {menuItems().map((item, index) => (
                 <motion.div variants={drawerItems} key={index}>
@@ -43,7 +43,7 @@ function Sidebar(props) {
                       return (
                         "flex items-center gap-2 rounded-md p-2 font-medium transition-all " +
                         (isActive
-                          ? `bg-cyan-500/10 text-cyan-500`
+                          ? `bg-cyan-500 text-white`
                           : "hover:bg-gray-500/10")
                       );
                     }}

@@ -43,7 +43,7 @@ function ProtectedRoutes({ allowedUser }) {
           pauseOnHover
           theme="light"
         />
-        <div className="over relative flex min-h-screen flex-col  bg-gray-100">
+        <div className="just relative flex min-h-screen flex-col bg-gray-100">
           <Navbar
             toggleDrawer={handleDrawerToggle}
             isCreatingRequest={handleCreateRequest}
@@ -55,14 +55,14 @@ function ProtectedRoutes({ allowedUser }) {
               </ModalBackdrop>
             )}
           </AnimatePresence>
-          <div className="relative mx-auto flex w-full max-w-7xl flex-1">
+          <div className="mx-auto flex h-full w-full max-w-7xl">
             <Sidebar isToggled={isToggled} isAdmin={userProfile.claims.admin} />
             <MenuDrawer
               isToggled={isToggled}
               isAdmin={userProfile.claims.admin}
               isMenuActive={setOpenSideBar}
             />
-            <main className="w-full">
+            <main className="min-h-[calc(100vh_-_56px)] min-w-0 w-full p-4">
               <Outlet />
             </main>
           </div>
