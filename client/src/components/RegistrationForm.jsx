@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { baseURL } from "../utils/api";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaChevronDown } from "react-icons/fa";
 import Swal from "sweetalert2";
 import FormInput from "./FormInput";
 import Button from "./Button";
 import { dropdownAnimation, popUp, popUpItem } from "../animations/variants";
-import validateRegistration from "../utils/validateRegistration";
+import Validation from "../utils/Validation";
+import ApiService from "../api/apiService";
 
 function RegistrationForm(props) {
   const { user } = props;
@@ -51,7 +50,7 @@ function RegistrationForm(props) {
   const handleRegistration = async (e) => {
     e.preventDefault();
     try {
-      const formErrors = validateRegistration(values);
+      const formErrors = Validation.validateRegistration(values);
 
       if (Object.keys(formErrors).length > 0) {
         setError(formErrors);
@@ -66,18 +65,10 @@ function RegistrationForm(props) {
           Swal.showLoading();
         },
       });
-
+      
       const token = await user.getIdToken();
 
-      await axios.post(
-        `${baseURL}/register`,
-        { ...values },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await ApiService.registerUser(values, token);
 
       // Hide loading after the API call completes
       Swal.close();

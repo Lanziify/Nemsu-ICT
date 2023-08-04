@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { baseURL } from "../utils/api";
-import axios from "axios";
 import {
   IoMenu,
   IoPersonCircle,
@@ -21,6 +19,7 @@ import { toast } from "react-toastify";
 import notificationRingtone from "../assets/notification.mp3";
 import { AnimatePresence, motion } from "framer-motion";
 import { fadeDefault, popUp, popUpItem } from "../animations/variants";
+import ApiService from "../api/apiService";
 
 function Navbar(props) {
   const { user, userProfile, logoutUser } = useAuth();
@@ -64,9 +63,7 @@ function Navbar(props) {
 
   const fetchNotifications = async () => {
     try {
-      const notifications = await axios.get(
-        `${baseURL}/notification/${user.uid}`
-      );
+      const notifications = await ApiService.fetchNotifications(user.uid);
       setNotification(notifications.data.notification);
       const unread = notifications.data.notification.filter(
         (notification) => notification.read === false
@@ -85,10 +82,10 @@ function Navbar(props) {
         vapidKey:
           "BItYMIPmv1rk5OeMPmz2__C1LaALFQZs-eRDr0JojHd8Hj3PyelNHMz5xzGgH-j1jRLecKyMVDP_wiRceSQvbDo",
       });
-      await axios.put(`${baseURL}/fcm`, { uid: user.uid, fcmToken: token });
+      await ApiService.updateFcm(user.uid, token);
     } else {
       await deleteToken(messaging);
-      await axios.put(`${baseURL}/fcm`, { uid: user.uid, fcmToken: null });
+      await ApiService.updateFcm(user.uid, null);
     }
   };
 
@@ -213,8 +210,10 @@ function Navbar(props) {
                   animate="animate"
                   exit="exit"
                   ref={notificationFloater}
-                  className="absolute right-0 top-full -z-10 mt-4 flex w-[360px] flex-col overflow-hidden rounded-md bg-white p-4 text-gray-500 shadow-xl"
-                  onClick={(e) => e.stopPropagation()}
+                  className="sm:max-md: absolute right-0 top-full -z-10 mt-4 flex w-[360px] flex-col rounded-md bg-white p-4 text-gray-500 shadow-xl"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
                 >
                   <motion.h1
                     variants={popUpItem}
@@ -255,7 +254,7 @@ function Navbar(props) {
                   animate="animate"
                   exit="exit"
                   ref={profileFloater}
-                  className="absolute right-0 top-full -z-10 mt-4 min-w-[280px] overflow-hidden rounded-md bg-white p-4 text-gray-500 shadow-xl"
+                  className="absolute right-0 top-full -z-10 mt-4 min-w-[280px] rounded-md bg-white p-4 text-gray-500 shadow-xl"
                 >
                   <div className="mb-2">
                     <div className="m-auto mb-2 h-[96px] max-w-[96px] rounded-full bg-gradient-to-br from-cyan-100 to-cyan-500"></div>

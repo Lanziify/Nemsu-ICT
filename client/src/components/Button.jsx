@@ -12,6 +12,7 @@ function Button(props) {
     danger,
     outlinePrimary,
     outlineSecondary,
+    outlineWarning,
     width,
     rounded,
     iconStart,
@@ -43,6 +44,8 @@ function Button(props) {
       return `border border-cyan-500 bg-transparent text-cyan-500 ${transition} hover:text-white hover:bg-cyan-500`;
     if (outlineSecondary)
       return `border border-gray-400 bg-transparent text-gray-400 ${transition} hover:text-white hover:bg-gray-400`;
+    if (outlineWarning)
+      return `border border-yellow-500 bg-transparent text-yellow-500 ${transition} hover:text-white hover:bg-yellow-500`;
     if (success)
       return `bg-green-500 text-white ${transition} hover:bg-green-600`;
     if (danger) return `bg-red-500 text-white ${transition} hover:bg-red-600`;
@@ -51,7 +54,7 @@ function Button(props) {
     return `bg-transparent text-gray-500 ${transition} hover:bg-gray-300/50`;
   };
 
-  const buttonClasses = `flex ${getWidthClass()} items-center justify-center gap-2 px-4 py-2 font-semibold ${getRoundedClass()} ${getVariantClass()} disabled:bg-gray-300 disabled:text-gray-400 outline-none`;
+  const buttonClasses = `flex ${getWidthClass()} items-center justify-center gap-2 px-4 py-2 font-semibold ${getRoundedClass()} ${getVariantClass()} disabled:opacity-50 outline-none`;
 
   return (
     <button
@@ -60,17 +63,9 @@ function Button(props) {
       onClick={onClick}
       disabled={disabled}
     >
-      {!disabled ? (
-        <>
-          {iconStart && iconStart}
-          {buttonText || "Button"}
-          {iconEnd && iconEnd}
-        </>
-      ) : (
-        <div className="animate-spin">
-          <AiOutlineLoading size={18} />
-        </div>
-      )}
+      {iconStart && iconStart}
+      {buttonText || "Button"}
+      {iconEnd && iconEnd}
     </button>
   );
 }

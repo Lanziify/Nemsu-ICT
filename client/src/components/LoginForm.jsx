@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import validateLogin from "../utils/validateLogin";
 import FormInput from "./FormInput";
 import logo from "../assets/logo.png";
 import Button from "./Button";
+import Validation from "../utils/Validation";
 
 function LoginForm() {
   const [values, setValues] = useState({
@@ -23,7 +23,7 @@ function LoginForm() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const formErrors = validateLogin(values);
+    const formErrors = Validation.validateLogin(values);
     if (Object.keys(formErrors).length > 0) {
       setError(formErrors);
     } else {

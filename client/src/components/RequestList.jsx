@@ -218,7 +218,8 @@ function RequestList(props) {
             item.data != "status"
               ? ""
               : (request[item.data] === "Pending" && "text-yellow-500") ||
-                (request[item.data] === "Accepted" && "text-green-500")
+                (request[item.data] === "Accepted" && "text-green-500") ||
+                (request[item.data] === "Completed" && "text-cyan-500")
           } before:font-bold sm:max-md:flex sm:max-md:justify-between sm:max-md:px-0 sm:max-md:py-1 sm:max-md:before:content-[attr(cell)]`}
           key={index}
         >
@@ -282,7 +283,7 @@ function RequestList(props) {
         initial="initial"
         animate="animate"
         exit="exit"
-        className="w-full table-auto border-collapse overflow-y-visible rounded-md text-gray-500"
+        className="table-auto border-collapse rounded-md"
       >
         {/* <caption className="text-2xl font-bold p-2 md:max-lg:hidden sm:max-md:block sm:max-md:p-4 text-cyan-500">Request List</caption> */}
         <thead>
@@ -297,7 +298,7 @@ function RequestList(props) {
               <th
                 className={`p-2 text-center sm:max-md:hidden ${
                   filter ? "sticky right-0 top-0 bg-white" : ""
-                }`}
+                } `}
               >
                 <div
                   ref={setPopperReference}
@@ -341,11 +342,7 @@ function RequestList(props) {
               {handleListDisplay().map((request, index) => (
                 <tr
                   key={index}
-                  className={`border-b last:border-0 sm:max-md:block  sm:max-md:rounded-md sm:max-md:border sm:max-md:p-4 sm:max-md:last:border ${
-                    admin
-                      ? "cursor-pointer duration-150 hover:bg-gray-500/10"
-                      : ""
-                  }`}
+                  className="cursor-pointer border-b duration-150 last:border-0 hover:bg-gray-500/10 sm:max-md:block sm:max-md:rounded-md sm:max-md:border sm:max-md:p-4 sm:max-md:last:border"
                   onClick={() => handleSelected(request)}
                 >
                   {/* <td className="p-1 text-center font-semibold">{index + 1}</td> */}
@@ -354,9 +351,9 @@ function RequestList(props) {
                     tableData(item, request, index)
                   )}
                   {admin && (
-                    <td cell="Operation" className="relative p-1">
+                    <td className="relative justify-between py-1 sm:max-md:hidden">
                       <div
-                        className="no_selection m-auto w-fit rounded-md bg-gray-200 p-1 text-xs duration-300 hover:bg-gray-300"
+                        className="no_selection m-auto w-fit rounded-md bg-gray-200 p-1 text-xs duration-300 hover:bg-gray-300 sm:max-md:m-0 sm:max-md:hidden"
                         onClick={(e) => {
                           e.stopPropagation();
                           !option.show && !option.index
@@ -377,49 +374,40 @@ function RequestList(props) {
                               className="absolute bottom-0 right-full  top-0 flex items-center gap-2 rounded-md"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              {request.status != "Accepted" && (
-                                <motion.div variants={popUpItemRight}>
-                                  {/* <MdCheckCircle size={18} />
-                              <p>Accept</p> */}
-
-                                  <Button
-                                    success
-                                    rounded="md"
-                                    iconStart={<MdCheckCircle size={18} />}
-                                    buttonText="Accept"
-                                    onClick={() => {
-                                      handleResponse(
-                                        request.requestId,
-                                        "Accepted"
-                                      );
-                                      setOption({});
-                                    }}
-                                  />
-                                </motion.div>
+                              {request.status === "Pending" && (
+                                <>
+                                  <motion.div variants={popUpItemRight}>
+                                    <Button
+                                      success
+                                      rounded="md"
+                                      iconStart={<MdCheckCircle size={18} />}
+                                      buttonText="Accept"
+                                      onClick={() => {
+                                        handleResponse(
+                                          request.requestId,
+                                          "Accepted"
+                                        );
+                                        setOption({});
+                                      }}
+                                    />
+                                  </motion.div>
+                                  <motion.div variants={popUpItemRight}>
+                                    <Button
+                                      danger
+                                      rounded="md"
+                                      iconStart={<MdCancel size={18} />}
+                                      buttonText="Cancel"
+                                      onClick={() => {
+                                        handleResponse(
+                                          request.requestId,
+                                          "Canceled"
+                                        );
+                                        setOption({});
+                                      }}
+                                    />
+                                  </motion.div>
+                                </>
                               )}
-                              <motion.div variants={popUpItemRight}>
-                                <Button
-                                  warning
-                                  rounded="md"
-                                  iconStart={<MdCancel size={18} />}
-                                  buttonText="Cancel"
-                                  onClick={() => {
-                                    handleResponse(
-                                      request.requestId,
-                                      "Canceled"
-                                    );
-                                    setOption({});
-                                  }}
-                                />
-                              </motion.div>
-                              <motion.div variants={popUpItemRight}>
-                                <Button
-                                  danger
-                                  rounded="md"
-                                  iconStart={<MdDelete size={18} />}
-                                  buttonText="Delete"
-                                />
-                              </motion.div>
                             </motion.div>
                           )}
                         </AnimatePresence>
@@ -430,8 +418,8 @@ function RequestList(props) {
               ))}
             </>
           ) : (
-            <tr className="text-center">
-              <td className="p-4" colSpan="100%">
+            <tr className="text-center sm:max-md:flex">
+              <td className="p-4 sm:max-md:flex-1" colSpan="100%">
                 There are no repair requests to display
               </td>
             </tr>
@@ -441,7 +429,11 @@ function RequestList(props) {
 
       <div className="sticky bottom-0 right-0 top-0 mt-2 flex gap-2 self-end">
         <p className="px-4 py-2 text-xs">
-          Page {currentPage} of {Math.ceil(list.length / ITEMS_PER_PAGE)}
+          Page{" "}
+          {currentPage === 1 && !Object.keys(list).length
+            ? currentPage - 1
+            : currentPage}{" "}
+          of {Math.ceil(list.length / ITEMS_PER_PAGE)}
         </p>
         <button
           className="rounded-md p-2 duration-300 hover:bg-gray-200 disabled:text-gray-300"
@@ -453,7 +445,10 @@ function RequestList(props) {
         <button
           className="rounded-md p-2 duration-300 hover:bg-gray-200 disabled:text-gray-300"
           onClick={handlePaginationNext}
-          disabled={currentPage === Math.ceil(list.length / ITEMS_PER_PAGE)}
+          disabled={
+            currentPage === 1 ||
+            currentPage === Math.ceil(list.length / ITEMS_PER_PAGE)
+          }
         >
           <MdChevronRight size={18} />
         </button>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import { MdCancel } from "react-icons/md";
 import { AnimatePresence, motion } from "framer-motion";
 import { drawerAnimation, drawerItems } from "../animations/variants";
 import { adminItems, userItems } from "../utils/MenuItems";
@@ -48,11 +49,17 @@ function MenuDrawer(props) {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="bg-nemsu flex h-full w-[280px] shadow-2xl backdrop-blur-md"
+              className="bg-nemsu relative flex h-full w-[280px] shadow-2xl backdrop-blur-md"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col justify-between bg-gradient-to-br from-cyan-500/20 to-gray-700 backdrop-blur-md">
                 {/* Drawer header */}
+                <div
+                  className="absolute cursor-pointer right-0 top-0 m-4"
+                  onClick={() => isMenuActive(false)}
+                >
+                  <MdCancel size={24} />
+                </div>
                 <div>
                   <div className="flex h-[180px] items-center p-4">
                     <h1 className="text-center text-lg font-black">

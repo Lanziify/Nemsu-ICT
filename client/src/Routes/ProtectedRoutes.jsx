@@ -51,7 +51,7 @@ function ProtectedRoutes({ allowedUser }) {
           <AnimatePresence>
             {isCreatingRequest && (
               <ModalBackdrop onClick={() => setIsCreatingRequest(false)}>
-                <RequestForm user={user} />
+                <RequestForm user={user} closeForm={setIsCreatingRequest}/>
               </ModalBackdrop>
             )}
           </AnimatePresence>

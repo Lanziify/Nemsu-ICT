@@ -49,7 +49,7 @@ const setAdmin = async (uid) => {
     await admin.auth().setCustomUserClaims(uid, { admin: true });
     await usersRef.doc(uid).update({ admin: true });
   } catch (error) {
-    console.error("Error setting admin claims:", error);
+    throw new Error("Error setting admin claims: " + error.message);
   }
 };
 // store users' repair requisition to firestore
@@ -104,9 +104,9 @@ const createRequest = asyncHandler(async ({ data }) => {
   await admin.messaging().send(payload);
 });
 // respond to users request
-const respondUserRequest = asyncHandler(async (requesId, status) => {
+const respondUserRequest = asyncHandler(async (requestId, status, data) => {
   const requestDoc = (
-    await requestsRef.where("requestId", "==", requesId).get()
+    await requestsRef.where("requestId", "==", requestId).get()
   ).docs[0];
   const requestSnapshot = requestDoc.data();
 
@@ -124,11 +124,14 @@ const respondUserRequest = asyncHandler(async (requesId, status) => {
   let notificationMessage = "";
 
   if (status == "Accepted") {
-    notificationTitle = "Request Accepted";
-    notificationMessage = `Your requisition request #${notificationDocRef.id} has been approved and is now being processed. We're working on fulfilling it. Thank you for your patience.`;
+    notificationTitle = "Request Accepted!";
+    notificationMessage = `Your request #${requestId} has been approved and is now being processed. We're working on fulfilling it. Thank you for your patience.`;
+  } else if (status == "Completed") {
+    notificationTitle = "Request Completed!";
+    notificationMessage = `We're pleased to inform you that your request #${requestId} has been processed and fulfilled. Let us know if you have any feedback!`;
   } else if (status == "Canceled") {
     notificationTitle = "Request Canceled";
-    notificationMessage = `We're sorry to inform you that your requisition request #${notificationDocRef.id} has been canceled.  If you have any concerns, feel free to reach out to us.`;
+    notificationMessage = `We're sorry to inform you that your requisition request #${requestId} has been canceled.  If you have any concerns, feel free to reach out to us.`;
   }
 
   const notification = {
@@ -152,14 +155,24 @@ const respondUserRequest = asyncHandler(async (requesId, status) => {
     },
   };
 
-  await notificationDocRef.set(notification);
-  await requestsRef
-    .doc(requesId)
-    .update({
+  if (status == "Accepted" || status == "Canceled") {
+    await requestsRef.doc(requestId).update({
       status: status,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
-  await admin.messaging().send(payload);
+    await notificationDocRef.set(notification);
+    await admin.messaging().send(payload);
+  }
+
+  if (status == "Completed") {
+    await requestsRef.doc(requestId).update({
+      status: status,
+      ...data,
+      completedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    await notificationDocRef.set(notification);
+    await admin.messaging().send(payload);
+  }
 });
 // get request made by the user using users' uid
 const getUserRequests = asyncHandler(async (uid) => {

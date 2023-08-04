@@ -16,7 +16,7 @@ function DtoNotification(props) {
           variants={popUpItem}
           className="relative cursor-pointer rounded-md text-sm hover:bg-gray-500/10 hover:duration-300 hover:ease-in-out"
           key={index}
-          onClick={console.log(notification)}
+          // onClick={console.log(notification)}
         >
           <div className="flex items-center gap-2 p-2">
             <div className="w-8 h-8 self-start rounded-full  bg-gradient-to-br from-cyan-100 to-cyan-500">
