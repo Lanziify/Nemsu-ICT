@@ -9,18 +9,18 @@ const notificationRef = db.collection("notifications");
 
 // Add user to firebase authentication
 // and creates a user document on the firestore db
-const createUser = asyncHandler(async (name, position, email, password) => {
-  const user = await admin.auth().createUser({
-    email,
-    password,
-  });
+const createUser = asyncHandler(async ({ data }) => {
+  const user = await admin
+    .auth()
+    .createUser({ email: data.email, password: data.password });
 
   const userData = {
     admin: false,
     uid: user.uid,
     fcmToken: "",
-    name: name,
-    position: position,
+    name: data.name,
+    position: data.position,
+    office: data.office,
     email: user.email,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   };
@@ -29,7 +29,6 @@ const createUser = asyncHandler(async (name, position, email, password) => {
 
   const userDocRef = usersRef.doc(user.uid);
   await userDocRef.set({ ...userData });
-  // Return true to indicate success
 });
 
 // get all registered users
@@ -72,6 +71,7 @@ const createRequest = asyncHandler(async ({ data }) => {
     requestId: requestDocRef.id,
     name: userSnapshot.name,
     position: userSnapshot.position,
+    office: userSnapshot.office,
     email: userSnapshot.email,
     status: "Pending",
     updatedAt: null,
@@ -85,7 +85,7 @@ const createRequest = asyncHandler(async ({ data }) => {
     receiverId: adminSnapshot.uid,
     title: `Incoming Request`,
     body: `You've got a new repair request from ${userSnapshot.name}. Check it out now to review and respond promptly.`,
-    data: { ...data },
+    data: { ...request },
     read: false,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   };
@@ -223,6 +223,10 @@ const updateFcmToken = asyncHandler(async (uid, fcmToken) => {
   return usersRef.doc(uid).update({ fcmToken: fcmToken });
 });
 
+const readNotification = asyncHandler(async (notificationId) => {
+  return notificationRef.doc(notificationId).update({ read: true });
+});
+
 module.exports = {
   createUser,
   getAllUsers,
@@ -234,4 +238,5 @@ module.exports = {
   getRequestNotification,
   getRequisitionResponseNotification,
   updateFcmToken,
+  readNotification,
 };

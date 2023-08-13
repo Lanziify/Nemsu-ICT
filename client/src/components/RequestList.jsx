@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   MdMoreHoriz,
@@ -15,6 +16,7 @@ import { usePopper } from "react-popper";
 import { popUp, popUpItemRight, popUpRight } from "../animations/variants";
 import Button from "./Button";
 import Portal from "./Portal";
+import { ACCEPTED, CANCELED, COMPLETED, PENDING } from "../utils/status";
 
 const ITEMS_PER_PAGE = 5; // Number of items to display per page
 
@@ -25,6 +27,7 @@ function RequestList(props) {
     name,
     email,
     position,
+    office,
     device,
     brand,
     model,
@@ -35,7 +38,6 @@ function RequestList(props) {
     operation,
     admin,
     handleResponse,
-    handleSelected,
   } = props;
 
   const [sortedRequest, setSortedRequest] = useState();
@@ -44,6 +46,8 @@ function RequestList(props) {
   const [ascending, setAscending] = useState(false);
   const [activeItems, setActiveItems] = useState({ ...props });
   const [currentPage, setCurrentPage] = useState(1);
+
+  const navigate = useNavigate();
 
   const [popperReference, setPopperReference] = useState();
   const [popperElement, setPopperElement] = useState();
@@ -103,6 +107,11 @@ function RequestList(props) {
       label: "Position",
     },
     {
+      type: activeItems.office,
+      data: "office",
+      label: "Office",
+    },
+    {
       type: activeItems.device,
       data: "device",
       label: "Device",
@@ -154,6 +163,11 @@ function RequestList(props) {
       title: "Position",
       item: "position",
       value: activeItems.position,
+    },
+    {
+      title: "Office",
+      item: "office",
+      value: activeItems.office,
     },
     {
       title: "Device",
@@ -217,9 +231,9 @@ function RequestList(props) {
           className={`overflow-hidden text-ellipsis whitespace-nowrap px-2 py-4 text-center before:text-gray-500 ${
             item.data != "status"
               ? ""
-              : (request[item.data] === "Pending" && "text-yellow-500") ||
-                (request[item.data] === "Accepted" && "text-green-500") ||
-                (request[item.data] === "Completed" && "text-cyan-500")
+              : (request[item.data] === PENDING && "text-yellow-500") ||
+                (request[item.data] === ACCEPTED && "text-green-500") ||
+                (request[item.data] === COMPLETED && "text-cyan-500")
           } before:font-bold sm:max-md:flex sm:max-md:justify-between sm:max-md:px-0 sm:max-md:py-1 sm:max-md:before:content-[attr(cell)]`}
           key={index}
         >
@@ -275,6 +289,10 @@ function RequestList(props) {
       JSON.stringify(activeItems, undefined, 2)
     );
   }, [activeItems]);
+
+  const handleRequest = (request) => {
+    navigate(`request/${request.requestId}`, { state: request });
+  };
 
   return (
     <div className="relative flex min-w-fit flex-col">
@@ -342,8 +360,8 @@ function RequestList(props) {
               {handleListDisplay().map((request, index) => (
                 <tr
                   key={index}
-                  className="cursor-pointer border-b duration-150 last:border-0 hover:bg-gray-500/10 sm:max-md:block sm:max-md:rounded-md sm:max-md:border sm:max-md:p-4 sm:max-md:last:border"
-                  onClick={() => handleSelected(request)}
+                  className="cursor-pointer border-b duration-150 last:border-0 hover:bg-gray-500/10 sm:max-md:block sm:max-md:rounded-2xl sm:max-md:border sm:max-md:p-4 sm:max-md:last:border"
+                  onClick={() => handleRequest(request)}
                 >
                   {/* <td className="p-1 text-center font-semibold">{index + 1}</td> */}
 
@@ -374,7 +392,7 @@ function RequestList(props) {
                               className="absolute bottom-0 right-full  top-0 flex items-center gap-2 rounded-md"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              {request.status === "Pending" && (
+                              {request.status === PENDING && (
                                 <>
                                   <motion.div variants={popUpItemRight}>
                                     <Button
@@ -385,7 +403,7 @@ function RequestList(props) {
                                       onClick={() => {
                                         handleResponse(
                                           request.requestId,
-                                          "Accepted"
+                                          ACCEPTED
                                         );
                                         setOption({});
                                       }}
@@ -400,7 +418,7 @@ function RequestList(props) {
                                       onClick={() => {
                                         handleResponse(
                                           request.requestId,
-                                          "Canceled"
+                                          CANCELED
                                         );
                                         setOption({});
                                       }}

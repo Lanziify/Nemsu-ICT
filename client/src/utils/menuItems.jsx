@@ -7,7 +7,7 @@ import {
   MdCancel,
   MdEditDocument,
 } from "react-icons/md";
-import { IoPeople, IoDocuments } from "react-icons/io5";
+import { IoPeople, IoDocuments, IoNotifications } from "react-icons/io5";
 
 export const userItems = [
   {
@@ -17,7 +17,7 @@ export const userItems = [
   },
   {
     path: "/ongoing",
-    name: "Requests",
+    name: "Ongoing Requests",
     icon: <MdEditDocument size={24} />,
   },
 ];
@@ -29,13 +29,18 @@ export const adminItems = [
     icon: <MdSpaceDashboard size={24} />,
   },
   {
+    path: "/notifications",
+    name: "Notifications",
+    icon: <IoNotifications size={24} />,
+  },
+  {
     path: "/users",
-    name: "Manage users",
+    name: "Manage Users",
     icon: <IoPeople size={24} />,
   },
   {
-    path: "/requests",
-    name: "Repair requests",
+    path: "/list",
+    name: "Request List",
     icon: <IoDocuments size={24} />,
   },
 ];

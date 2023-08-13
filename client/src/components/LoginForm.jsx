@@ -38,10 +38,11 @@ function LoginForm() {
   return (
     <>
       <form
-        className="flex w-1/3 flex-col items-center gap-4 rounded-md border bg-white px-8 pb-8 pt-6 shadow-sm"
+        className="flex min-w-0 w-96 flex-col items-center gap-4 rounded-xl bg-white px-8 pb-8 pt-6 shadow-sm"
         onSubmit={handleSubmit}
       >
-        <img className="max-h-20 rounded-full" src={logo} />
+        {/* <img className="max-h-20 rounded-full" src={logo} /> */}
+        <div className="h-24 min-w-[96px] rounded-full border bg-gradient-to-br from-cyan-100 to-cyan-500"></div>
         <span className="text-lg font-bold text-gray-500">
           Log in to your account
         </span>
@@ -66,7 +67,7 @@ function LoginForm() {
         <Button
           primary
           width="full"
-          rounded="md"
+          rounded="lg"
           buttonText="Sign in"
           type="submit"
         />

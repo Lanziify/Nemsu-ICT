@@ -4,9 +4,19 @@ import FormInput from "./FormInput";
 import Button from "./Button";
 import ApiService from "../api/apiService";
 import Validation from "../utils/Validation";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  carousell,
+  dropdownAnimation,
+  fadeDefault,
+  popUp,
+  popUpItem,
+} from "../animations/variants";
 
 function ResponseForm(props) {
-  const { activeForm, requestId, setLoading, setSelectedRequest } = props;
+  const { activeForm, requestId, setLoading } = props;
+  const navigate = useNavigate();
   const [values, setValues] = useState({
     actionTaken: "",
     recommendation: "",
@@ -50,29 +60,24 @@ function ResponseForm(props) {
       setLoading(false);
       activeForm(false);
       setFormLoading(false);
-      setSelectedRequest(false);
+      navigate(-1);
     } catch (error) {
       console.log(error);
     }
   };
 
   return (
-    <form
-      className={`mb-4 flex flex-col gap-4 rounded-md bg-white p-8 text-sm text-gray-500 shadow-sm ${
-        formLoading ? "[&>*]:animate-pulse" : ""
-      }`}
+    <motion.form
+      // variants={carousell}
+      // initial="initial"
+      // animate="animate"
+      // exit="exit"
+      className="flex flex-col gap-4 bg-white p-6 text-sm"
       onSubmit={handleCompleteRequest}
     >
-      <div
-        className="flex w-fit cursor-pointer items-center text-gray-400 duration-300 hover:text-gray-500"
-        onClick={() => {
-          !formLoading ? activeForm(false) : null;
-        }}
-      >
-        <MdChevronLeft size={24} />
-        <p>Details</p>
-      </div>
-      <h1 className="text-xl font-bold">Repair Response</h1>
+      <motion.h1 variants={popUpItem} className="text-xl font-bold">
+        Repair Response
+      </motion.h1>
       {/* <div className="flex flex-col gap-4"> */}
       <FormInput
         name="actionTaken"
@@ -92,11 +97,18 @@ function ResponseForm(props) {
       />
       {/* </div> */}
       <div className="grid grid-cols-2 gap-2">
-        <p className="col-span-2 text-xs font-medium text-gray-400">
+        <motion.p
+          variants={popUpItem}
+          className="col-span-2 text-xs font-medium text-gray-400"
+        >
           Equipment Type
-        </p>
+        </motion.p>
         {adminRadioItems.map((item, index) => (
-          <div className="flex items-center gap-2" key={index}>
+          <motion.div
+            variants={popUpItem}
+            className="flex items-center gap-2"
+            key={index}
+          >
             <input
               type="radio"
               checked={values.equipment === item.data}
@@ -107,7 +119,7 @@ function ResponseForm(props) {
               onChange={handleOnChange}
             />
             <label htmlFor={item.id}>{item.data}</label>
-          </div>
+          </motion.div>
         ))}
         {error.equipment && (
           <span className="col-span-2 text-start text-sm text-red-500">
@@ -115,16 +127,28 @@ function ResponseForm(props) {
           </span>
         )}
       </div>
-
-      <Button
-        primary
-        type="submit"
-        rounded="md"
-        width="full"
-        buttonText="Mark as completed"
-        disabled={formLoading}
-      />
-    </form>
+      <motion.div variants={popUpItem} className="flex gap-4">
+        <Button
+          secondary
+          type="button"
+          rounded="xl"
+          width="full"
+          buttonText="Close"
+          disabled={formLoading}
+          onClick={() => {
+            !formLoading ? activeForm(false) : null;
+          }}
+        />
+        <Button
+          primary
+          type="submit"
+          rounded="xl"
+          width="full"
+          buttonText="Mark as completed"
+          disabled={formLoading}
+        />
+      </motion.div>
+    </motion.form>
   );
 }
 

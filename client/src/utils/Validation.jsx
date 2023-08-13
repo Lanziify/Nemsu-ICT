@@ -28,6 +28,9 @@ class Validation {
     if (!values.position) {
       errorMessage.position = "Position is required.";
     }
+    if (!values.office) {
+      errorMessage.office = "Office is required.";
+    }
     // Request form validations
     if (!values.email) {
       errorMessage.email = "Email is required.";
@@ -67,10 +70,6 @@ class Validation {
 
     if (!values.actionTaken) {
       errorMessage.actionTaken = "Please don't forget to fill out this field.";
-    }
-    if (!values.recommendation) {
-      errorMessage.recommendation =
-        "Please provide recommendations for the user.";
     }
     if (!values.equipment) {
       errorMessage.equipment = "Please specify the type of equipment.";

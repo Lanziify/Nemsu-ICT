@@ -1,8 +1,8 @@
 import "./App.css";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 // Routes
-import PublicRoutes from "./Routes/PublicRoutes";
-import ProtectedRoutes from "./Routes/ProtectedRoutes";
+import PublicRoutes from "./routes/PublicRoutes";
+import ProtectedRoutes from "./routes/ProtectedRoutes";
 // Public Pages
 import Hero from "./pages/Hero";
 import Notfound from "./pages/Notfound";
@@ -16,28 +16,40 @@ import Completed from "./pages/user/Completed";
 import Dashboard from "./pages/admin/Dashboard";
 import Users from "./pages/admin/Users";
 import Requests from "./pages/admin/Requests";
+import RequestDetails from "./pages/admin/RequestDetails";
+import { useAuth } from "./contexts/AuthContext";
+import Notifications from "./pages/Notifications";
 
 function App() {
-  // const location = useLocation();
+  const { user } = useAuth();
   return (
-    <Routes key={location.pathname} location={location}>
-      <Route element={<PublicRoutes />}>
-        <Route path="/" element={<Hero />} />
-        <Route path="*" element={<Notfound />} />
+    <Routes>
+      <Route element={<ProtectedRoutes allowedUser={[true]} />}>
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="users" element={<Users />} />
+        <Route path="list/:tab" element={<Requests />} />
+        <Route path="list" element={<Navigate replace to='/list/pending' />} />
+        <Route path="list/:tab/request/:id" element={<RequestDetails />} />
+        <Route path="notifications/request/:id" element={<RequestDetails />} />
+        <Route path="" element={<Navigate replace to='' />} />
       </Route>
-      {/* Protected Routes */}
-      <Route element={<ProtectedRoutes allowedUser={false} />}>
+
+      <Route element={<ProtectedRoutes allowedUser={[false]} />}>
         <Route path="home" element={<Home />} />
-        <Route path="request" element={<Request />} />
         <Route path="ongoing" element={<Ongoing />} />
+        <Route path="ongoing/request/:requestId" element={<RequestDetails />} />
         <Route path="completed" element={<Completed />} />
+      </Route>
+
+      {/* {user && ( */}
+      <Route element={<ProtectedRoutes allowedUser={[true, false]} />}>
+        <Route path="notifications" element={<Notifications />} />
         <Route path="settings" element={<Settings />} />
         <Route path="*" element={<Notfound />} />
       </Route>
-      <Route element={<ProtectedRoutes allowedUser={true} />}>
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="users" element={<Users />} />
-        <Route path="requests" element={<Requests />} />
+      {/* )} */}
+      <Route element={<PublicRoutes />}>
+        <Route path="/" index element={<Hero />} />
       </Route>
     </Routes>
   );

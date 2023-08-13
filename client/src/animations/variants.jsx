@@ -4,11 +4,9 @@ export const fadeDefault = {
   },
   animate: {
     opacity: 1,
-    duration: 0.05,
   },
   exit: {
     opacity: 0,
-    delay: 0.05,
   },
 };
 export const drawerAnimation = {
@@ -36,6 +34,36 @@ export const drawerAnimation = {
     },
   },
 };
+export const carousell = {
+  initial: {
+    opacity: 0.5,
+    x: -350,
+  },
+  animate: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      // delay: 0,
+      type: "spring",
+      damping: 20.8,
+      stiffness: 100,
+      // mass: 0.1,
+      delayChildren: 0,
+      staggerChildren: 0.05,
+    },
+  },
+  exit: {
+    opacity: 0,
+    x: 355,
+    transition: {
+      // delay: 0.5 / 2,
+      type: "spring",
+      damping: 20.8,
+      stiffness: 100,
+
+    },
+  },
+};
 
 export const drawerItems = {
   initial: { opacity: 0, y: 40 },
@@ -57,19 +85,39 @@ export const drawerItems = {
 
 export const dropdownAnimation = {
   initial: {
-    clipPath: "inset(0% 50% 90% 50% round 6px)",
-    duration: 0.05,
+    opacity: 0,
+    clipPath: "inset(0% 50% 90% 50% round 16px)",
   },
   animate: {
-    clipPath: "inset(0% 0% 0% 0% round 6px)",
+    opacity: 1,
+    clipPath: "inset(0% 0% 0% 0% round 16px)",
     transition: {
       delayChildren: 0,
-      staggerChildren: 0.1,
+      staggerChildren: 0.04,
     },
   },
   exit: {
-    duration: 0.0,
-    clipPath: "inset(0% 50% 90% 50% round 6px)",
+    opacity: 0,
+    clipPath: "inset(0% 50% 90% 50% round 16px)",
+  },
+};
+
+export const menuDrawer = {
+  initial: {
+    opacity: 0,
+    clipPath: "inset(0% 90% 0% 0% round 16px)",
+  },
+  animate: {
+    opacity: 1,
+    clipPath: "inset(0% 0% 0% 0% round 16px)",
+    transition: {
+      delayChildren: 0,
+      staggerChildren: 0.04,
+    },
+  },
+  exit: {
+    opacity: 0,
+    clipPath: "inset(0% 90% 0% 0% round 16px)",
   },
 };
 
@@ -83,18 +131,37 @@ export const popUp = {
     opacity: 1,
     transition: {
       type: "spring",
-      damping: 7.8,
+      damping: 18.8,
       stiffness: 100,
-      mass: 0.32,
+      // mass: 0.1,
       delayChildren: 0,
-      staggerChildren: 0.02,
+      staggerChildren: 0.05,
     },
   },
   exit: {
-    y: 40,
+    y: 0,
     opacity: 0,
   },
 };
+
+export const popUpItem = {
+  initial: { opacity: 0, y: 40 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      damping: 7.8,
+      stiffness: 100,
+      mass: 0.22,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: 0,
+  },
+};
+
 export const popUpRight = {
   initial: {
     x: 10,
@@ -118,23 +185,6 @@ export const popUpRight = {
   },
 };
 
-export const popUpItem = {
-  initial: { opacity: 0, y: 40 },
-  animate: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      damping: 7.8,
-      stiffness: 100,
-      mass: 0.22,
-    },
-  },
-  exit: {
-    opacity: 0,
-    y: 40,
-  },
-};
 export const popUpItemRight = {
   initial: { opacity: 0, x: 10 },
   animate: {

@@ -31,8 +31,8 @@ function Sidebar(props) {
   return (
     <>
       {showSidebar && isToggled && (
-        <aside className="">
-          <div className="sticky top-[72px] my-4 ml-4 flex min-h-[calc(100vh_-_88px)] w-[280px] flex-col justify-between overflow-hidden rounded-md bg-white p-4 text-sm  text-gray-500 shadow-sm">
+        <aside>
+          <div className="sticky top-[72px] flex min-h-[calc(100vh_-_88px)] w-[280px] flex-col justify-between overflow-hidden rounded-2xl bg-white p-4 text-sm text-gray-500 shadow-sm">
             <div>
               {menuItems().map((item, index) => (
                 <motion.div variants={drawerItems} key={index}>
@@ -41,10 +41,10 @@ function Sidebar(props) {
                     key={index}
                     className={({ isActive }) => {
                       return (
-                        "flex items-center gap-2 rounded-md p-2 font-medium transition-all " +
+                        "flex items-center gap-2 rounded-xl p-2 font-medium transition-all " +
                         (isActive
                           ? `bg-cyan-500 text-white`
-                          : "hover:bg-gray-500/10")
+                          : "hover:bg-cyan-500/10")
                       );
                     }}
                   >
@@ -55,8 +55,11 @@ function Sidebar(props) {
               ))}
             </div>
 
-            <footer className="text-center text-xs">
-              © 2023 North Eastern Mindanao State University - Tagbina Campus
+            <footer className="text-center text-[10px] leading-tight">
+              <p>
+                2023 North Eastern Mindanao State University - Tagbina Campus
+              </p>
+              <p>Current version 0.0.1.2</p>
             </footer>
           </div>
         </aside>

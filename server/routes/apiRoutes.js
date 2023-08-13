@@ -12,10 +12,11 @@ const {
   updateFcmToken,
   respondUserRequest,
   setAdmin,
+  readNotification,
 } = require("../controller/firestoreController");
 
-router.route("/register").post(createUser);
-router.route("/create").post(createRequest);
+router.route("/register").post(authMiddleware, createUser);
+router.route("/create").post(authMiddleware, createRequest);
 
 router.route("/users").get(getAllUsers);
 router.route("/requests").get(getAllRequest);
@@ -26,5 +27,6 @@ router.route("/notification/:id").get(getRequisitionResponseNotification);
 router.route("/admin/:id").put(setAdmin);
 router.route("/fcm").put(updateFcmToken);
 router.route("/request/:id").put(respondUserRequest);
+router.route("/notification/:id").put(readNotification);
 
 module.exports = router;

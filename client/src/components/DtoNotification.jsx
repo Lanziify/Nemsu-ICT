@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 import { popUpItem } from "../animations/variants";
 
 function DtoNotification(props) {
-  const { notifications } = props;
+  const { notifications, selectedNotification } = props;
+
   const sortedNotifications = [...notifications].sort(
     (a, b) => b.createdAt._seconds - a.createdAt._seconds
   );
@@ -14,19 +15,30 @@ function DtoNotification(props) {
       {sortedNotifications.map((notification, index) => (
         <motion.div
           variants={popUpItem}
-          className="relative cursor-pointer rounded-md text-sm hover:bg-gray-500/10 hover:duration-300 hover:ease-in-out"
+          className="relative cursor-pointer rounded-xl text-sm hover:bg-gray-500/10"
           key={index}
-          // onClick={console.log(notification)}
+          onClick={() => {
+            selectedNotification(notification);
+            // console.log(notification.data.requestId)
+          }}
         >
           <div className="flex items-center gap-2 p-2">
-            <div className="w-8 h-8 self-start rounded-full  bg-gradient-to-br from-cyan-100 to-cyan-500">
-
-            </div>
+            <div className="h-8 w-8 self-start rounded-full  bg-gradient-to-br from-cyan-100 to-cyan-500"></div>
             <div className="flex-1 ">
-              <p className="text-md font-bold text-cyan-500">
+              <p
+                className={`text-md font-bold ${
+                  !notification.read ? "text-cyan-500" : "text-gray-400"
+                }`}
+              >
                 {notification.title}
               </p>
-              <p className="">{notification?.body}</p>
+              <p
+                className={`${
+                  !notification.read ? "" : "text-gray-500"
+                }`}
+              >
+                {notification?.body}
+              </p>
               <p
                 className={`text-start text-xs ${
                   !notification.read ? "text-cyan-500" : "text-gray-400"

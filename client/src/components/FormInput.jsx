@@ -11,18 +11,12 @@ function FormInput(props) {
   //   setFocus(true);
   // }
   return (
-    <div className="flex w-full flex-col gap-1">
+    <motion.div variants={popUpItem} className="flex w-full flex-col gap-1">
       {label && (
-        <motion.label
-          variants={popUpItem}
-          className="font-medium text-xs text-gray-400"
-        >
-          {label}
-        </motion.label>
+        <label className="text-xs font-medium text-gray-400">{label}</label>
       )}
-      <motion.input
-        variants={popUpItem}
-        className="w-full border rounded p-2 text-gray-500  outline-none  "
+      <input
+        className="w-full border-b p-2 text-gray-500  outline-none  "
         name={name}
         type={type}
         value={value}
@@ -34,7 +28,7 @@ function FormInput(props) {
       {error && (
         <span className="text-start text-sm text-red-500">{error}</span>
       )}
-    </div>
+    </motion.div>
   );
 }
 

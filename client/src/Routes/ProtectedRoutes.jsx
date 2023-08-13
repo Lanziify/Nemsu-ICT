@@ -27,8 +27,8 @@ function ProtectedRoutes({ allowedUser }) {
   const handleCreateRequest = () => {
     setIsCreatingRequest(true);
   };
-
-  return userProfile?.claims?.admin === allowedUser ? (
+  
+  return allowedUser.includes(userProfile?.claims?.admin) ? (
     <>
       <div className="relative">
         <ToastContainer
@@ -43,7 +43,7 @@ function ProtectedRoutes({ allowedUser }) {
           pauseOnHover
           theme="light"
         />
-        <div className="just relative flex min-h-screen flex-col bg-gray-100">
+        <div className="relative flex min-h-screen flex-col bg-gray-100">
           <Navbar
             toggleDrawer={handleDrawerToggle}
             isCreatingRequest={handleCreateRequest}
@@ -51,18 +51,18 @@ function ProtectedRoutes({ allowedUser }) {
           <AnimatePresence>
             {isCreatingRequest && (
               <ModalBackdrop onClick={() => setIsCreatingRequest(false)}>
-                <RequestForm user={user} closeForm={setIsCreatingRequest}/>
+                <RequestForm user={user} closeForm={setIsCreatingRequest} />
               </ModalBackdrop>
             )}
           </AnimatePresence>
-          <div className="mx-auto flex h-full w-full max-w-7xl">
+          <div className="mx-auto flex h-full w-full max-w-7xl gap-4 p-4">
             <Sidebar isToggled={isToggled} isAdmin={userProfile.claims.admin} />
             <MenuDrawer
               isToggled={isToggled}
               isAdmin={userProfile.claims.admin}
               isMenuActive={setOpenSideBar}
             />
-            <main className="min-h-[calc(100vh_-_56px)] min-w-0 w-full p-4">
+            <main className="w-full min-w-0">
               <Outlet />
             </main>
           </div>

@@ -7,12 +7,14 @@ import Button from "./Button";
 import { dropdownAnimation, popUp, popUpItem } from "../animations/variants";
 import Validation from "../utils/Validation";
 import ApiService from "../api/apiService";
+import ResizablePanel from "./ResizablePanel";
 
 function RegistrationForm(props) {
   const { user } = props;
   const [values, setValues] = useState({
     name: "",
     position: "",
+    office: "",
     email: "",
     password: "",
   });
@@ -65,7 +67,7 @@ function RegistrationForm(props) {
           Swal.showLoading();
         },
       });
-      
+
       const token = await user.getIdToken();
 
       await ApiService.registerUser(values, token);
@@ -76,8 +78,8 @@ function RegistrationForm(props) {
       // Show success message
       Swal.fire({
         icon: "success",
-        title: "Thank you!",
-        text: "Your request has been successfully submitted.",
+        title: "Registered!",
+        text: "User has been successfully registered.",
         showConfirmButton: true,
         confirmButtonText: "Confirm",
         confirmButtonColor: "#3b82f6",
@@ -86,6 +88,7 @@ function RegistrationForm(props) {
       setValues({
         name: "",
         position: "",
+        office: "",
         email: "",
         password: "",
       });
@@ -93,7 +96,7 @@ function RegistrationForm(props) {
       Swal.fire({
         icon: "error",
         title: "Something went wrong!",
-        text: error.response.data.message,
+        text: error.message,
         showConfirmButton: true,
         confirmButtonText: "Return",
         confirmButtonColor: "#3b82f6",
@@ -132,7 +135,7 @@ function RegistrationForm(props) {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="relative flex min-w-[480px] flex-col items-center justify-between gap-4 rounded-lg border-gray-100 bg-white p-6 shadow-xl"
+      className="relative flex min-w-[480px] flex-col items-center justify-between gap-4 rounded-2xl border-gray-100 bg-white p-6 shadow-xl"
       onSubmit={handleRegistration}
     >
       <motion.h1
@@ -158,18 +161,20 @@ function RegistrationForm(props) {
         <p className="mb-1 w-full text-xs font-medium text-gray-400 ">
           Position
         </p>
-        <div
-          ref={dropDownButtonRef}
-          className={`flex place-items-center justify-between rounded-md border p-2 ${
-            !values.device ? "text-gray-400" : ""
-          }`}
-          onClick={() => setDropdown(!dropdown)}
-          style={{ cursor: !dropdown ? "pointer" : "auto" }}
-        >
-          <span>{!values.position ? "Select Position" : values.position}</span>
-          <FaChevronDown />
-        </div>
-        <AnimatePresence>
+        <ResizablePanel>
+          <div
+            ref={dropDownButtonRef}
+            className={`flex place-items-center justify-between rounded-xl border p-2 ${
+              !values.device ? "text-gray-400" : ""
+            }`}
+            onClick={() => setDropdown(!dropdown)}
+            style={{ cursor: !dropdown ? "pointer" : "auto" }}
+          >
+            <span>
+              {!values.position ? "Select Position" : values.position}
+            </span>
+            <FaChevronDown />
+          </div>
           {dropdown && (
             <motion.ul
               variants={dropdownAnimation}
@@ -177,7 +182,7 @@ function RegistrationForm(props) {
               animate="animate"
               exit="exit"
               ref={dropDownContentRef}
-              className={`mt-4 max-h-48 w-full overflow-auto rounded-md bg-black/5 backdrop-blur-2xl`}
+              className={`mb-2 mt-4 max-h-48 w-full overflow-auto rounded-md bg-black/5 backdrop-blur-2xl`}
             >
               {position.map((position, index) => (
                 <motion.li
@@ -191,7 +196,7 @@ function RegistrationForm(props) {
               ))}
             </motion.ul>
           )}
-        </AnimatePresence>
+        </ResizablePanel>
 
         {error.position && (
           <span className="w-full text-start text-sm text-red-500">
@@ -199,6 +204,15 @@ function RegistrationForm(props) {
           </span>
         )}
       </motion.div>
+      <FormInput
+        label="Office"
+        name="office"
+        type="office"
+        value={values.office}
+        placeholder="Office"
+        error={error.office}
+        onChange={handleOnChange}
+      />
       <FormInput
         label="Email"
         name="email"
@@ -217,13 +231,15 @@ function RegistrationForm(props) {
         error={error.password}
         onChange={handleOnChange}
       />
-      <Button
-        primary
-        width="full"
-        rounded="md"
-        type="submit"
-        buttonText="Register"
-      />
+      <motion.div variants={popUpItem} className="w-full">
+        <Button
+          primary
+          width="full"
+          rounded="xl"
+          type="submit"
+          buttonText="Register"
+        />
+      </motion.div>
     </motion.form>
   );
 }

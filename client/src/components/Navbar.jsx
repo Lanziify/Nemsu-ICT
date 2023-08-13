@@ -8,7 +8,7 @@ import {
   IoNotificationsOutline,
 } from "react-icons/io5";
 import { BsChatLeftDots } from "react-icons/bs";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { useAuth } from "../contexts/AuthContext";
 import Button from "./Button";
@@ -20,13 +20,21 @@ import notificationRingtone from "../assets/notification.mp3";
 import { AnimatePresence, motion } from "framer-motion";
 import { fadeDefault, popUp, popUpItem } from "../animations/variants";
 import ApiService from "../api/apiService";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchNotifications } from "../redux/notificationSlice";
+import { fetchRequests } from "../redux/requestSlice";
+import { readNotification } from "../redux/readNotificationSlice";
 
 function Navbar(props) {
-  const { user, userProfile, logoutUser } = useAuth();
   const { toggleDrawer, isCreatingRequest } = props;
-  const [notifications, setNotification] = useState([]);
-
-  const [unreadNotifications, setUnreadNotifications] = useState();
+  const { user, userProfile, logoutUser } = useAuth();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { notifications, unread } = useSelector((state) => state.notifications);
+  const { requests } = useSelector((state) => state.requests);
+  const { isReadingNotifiation } = useSelector(
+    (state) => state.readNotification
+  );
   const [isProfileToggled, setIsProfileToggled] = useState(false);
   const [isNotificationToggled, setIsNotificationToggled] = useState(false);
   // Refs
@@ -61,20 +69,6 @@ function Navbar(props) {
     }
   }
 
-  const fetchNotifications = async () => {
-    try {
-      const notifications = await ApiService.fetchNotifications(user.uid);
-      setNotification(notifications.data.notification);
-      const unread = notifications.data.notification.filter(
-        (notification) => notification.read === false
-      ).length;
-
-      setUnreadNotifications(unread);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const requestPermission = async () => {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
@@ -99,10 +93,27 @@ function Navbar(props) {
     </>
   );
 
+  const handleSelectedNotification = (notification) => {
+    if (!notification.read) {
+      dispatch(readNotification(notification.notificationId));
+    }
+    const selected = requests.find((request) => {
+      return request.requestId === notification.data.requestId;
+    });
+    navigate(`notifications/request/${selected.requestId}`, {
+      state: selected,
+    });
+    setIsNotificationToggled(false);
+  };
+
   useEffect(() => {
     requestPermission();
     try {
       onMessage(messaging, (payload) => {
+        const ringtone = new Audio(notificationRingtone);
+        dispatch(fetchNotifications(user.uid));
+        dispatch(fetchRequests());
+
         toast(
           <ToastifyNotification
             title={payload.data.title}
@@ -119,10 +130,6 @@ function Navbar(props) {
             theme: "light",
           }
         );
-
-        fetchNotifications();
-
-        const ringtone = new Audio(notificationRingtone);
         ringtone.play();
       });
     } catch (error) {
@@ -131,8 +138,14 @@ function Navbar(props) {
   }, []);
 
   useEffect(() => {
-    fetchNotifications();
-  }, []);
+    dispatch(fetchNotifications(user.uid));
+    dispatch(fetchRequests());
+  }, [isReadingNotifiation]);
+
+  if (window.innerWidth <= 425 && isNotificationToggled) {
+    navigate("/notifications");
+    setIsNotificationToggled(false);
+  }
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -164,7 +177,7 @@ function Navbar(props) {
   }, [isNotificationToggled, isProfileToggled]);
 
   return (
-    <header className="no_selection sticky top-0 z-10 bg-white text-sm text-gray-500 shadow-sm">
+    <header className="no_selection sticky top-0 z-10 bg-white text-sm  shadow-sm">
       {/* Left side div */}
       <div className="mx-auto flex max-w-7xl justify-between px-4 py-2">
         <div className="flex items-center gap-4">
@@ -184,25 +197,28 @@ function Navbar(props) {
           {/* Notification */}
           <div
             className="relative flex items-center p-1"
-            onClick={() => setIsNotificationToggled(!isNotificationToggled)}
+            onClick={() => {
+              setIsNotificationToggled(!isNotificationToggled);
+            }}
           >
             <div className="cursor-pointer" ref={notificationButton}>
               <div>
                 <IoNotificationsOutline size={24} />
               </div>
-              {unreadNotifications ? (
+              {unread ? (
                 <div
                   className="no_selection absolute right-0 top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-cyan-500  text-white"
                   onClick={() =>
                     setIsNotificationToggled(!isNotificationToggled)
                   }
                 >
-                  <p className="text-[10px]">{unreadNotifications}</p>
+                  <span className="absolute -z-10 h-4 w-4 animate-ping rounded-full bg-cyan-500"></span>
+                  <p className="text-[10px]">{unread}</p>
                 </div>
               ) : null}
             </div>
             {/* Notification floater */}
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
               {isNotificationToggled && (
                 <motion.div
                   variants={popUp}
@@ -210,18 +226,34 @@ function Navbar(props) {
                   animate="animate"
                   exit="exit"
                   ref={notificationFloater}
-                  className="sm:max-md: absolute right-0 top-full -z-10 mt-4 flex w-[360px] flex-col rounded-md bg-white p-4 text-gray-500 shadow-xl"
+                  className="sm:max-md: absolute right-0 top-full -z-10 mt-4 flex max-h-[632px] w-[360px] flex-col overflow-hidden rounded-2xl bg-white/80 shadow-xl backdrop-blur-md  [&>div]:p-4"
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
                 >
-                  <motion.h1
-                    variants={popUpItem}
-                    className="mb-2 text-2xl font-bold"
-                  >
-                    Notifications
-                  </motion.h1>
-                  <DtoNotification notifications={notifications} />
+                  <div>
+                    <motion.h1
+                      variants={popUpItem}
+                      className="text-2xl font-bold"
+                    >
+                      Notifications
+                    </motion.h1>
+                  </div>
+                  <div className="overflow-y-auto">
+                    <DtoNotification
+                      notifications={notifications}
+                      selectedNotification={(data) =>
+                        handleSelectedNotification(data)
+                      }
+                    />
+                  </div>
+                  <div>
+                    <ul className="flex justify-center gap-4 [&>li]:cursor-pointer [&>li]:rounded-xl">
+                      <li>All</li>
+                      <li>Unread</li>
+                      <li>Completed</li>
+                    </ul>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -254,7 +286,7 @@ function Navbar(props) {
                   animate="animate"
                   exit="exit"
                   ref={profileFloater}
-                  className="absolute right-0 top-full -z-10 mt-4 min-w-[280px] rounded-md bg-white p-4 text-gray-500 shadow-xl"
+                  className="absolute right-0 top-full -z-10 mt-4 min-w-[280px] rounded-2xl bg-white/80 p-4 shadow-xl  backdrop-blur-md"
                 >
                   <div className="mb-2">
                     <div className="m-auto mb-2 h-[96px] max-w-[96px] rounded-full bg-gradient-to-br from-cyan-100 to-cyan-500"></div>

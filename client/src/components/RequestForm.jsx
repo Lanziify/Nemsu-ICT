@@ -86,7 +86,7 @@ function RequestForm(props) {
       Swal.fire({
         icon: "error",
         title: "Something went wrong!",
-        text: error.response.data.message,
+        text: error.message,
         showConfirmButton: true,
         confirmButtonText: "Return",
         confirmButtonColor: "#3b82f6",
@@ -127,7 +127,7 @@ function RequestForm(props) {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="relative flex max-w-md flex-col items-center justify-between gap-4 rounded-md bg-white p-6 shadow-xl"
+      className="relative flex max-w-md flex-col items-center justify-between gap-4 rounded-2xl bg-white p-6 shadow-xl"
       onSubmit={handleSubmit}
       onClick={(e) => e.stopPropagation()}
     >
@@ -156,7 +156,7 @@ function RequestForm(props) {
         </p>
         <div
           ref={dropDownButtonRef}
-          className={`flex cursor-pointer place-items-center justify-between rounded-md border p-2 ${
+          className={`flex cursor-pointer place-items-center justify-between rounded-xl border p-2 ${
             !values.device ? "text-gray-400" : ""
           }`}
           onClick={() => setDropdown(!dropdown)}
@@ -172,7 +172,7 @@ function RequestForm(props) {
               animate="animate"
               exit="exit"
               ref={dropDownContentRef}
-              className={`absolute mt-4 w-full overflow-hidden rounded-md bg-black/5 backdrop-blur-2xl`}
+              className={`absolute mt-4 w-full overflow-hidden rounded-xl bg-black/5 backdrop-blur-2xl`}
             >
               {devices.map((device, index) => (
                 <motion.li
@@ -270,7 +270,7 @@ function RequestForm(props) {
       <Button
         primary
         width="full"
-        rounded="md"
+        rounded="xl"
         type="submit"
         buttonText="Submit"
       />

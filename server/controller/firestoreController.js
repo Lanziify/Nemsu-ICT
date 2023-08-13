@@ -4,17 +4,9 @@ const asyncHandler = require("express-async-handler");
 
 // Create User
 const createUser = asyncHandler(async (req, res) => {
-  const { name, position, email, password } = req.body;
-  // if ((!email, !password)) {
-  //   return res.status(400);
-  // }
+  const { data } = req.body;
   try {
-    const register = await firestoreModel.createUser(
-      name,
-      position,
-      email,
-      password
-    );
+    const register = await firestoreModel.createUser({ data });
     res.status(200).json({ register });
   } catch (error) {
     res.status(400).send({ message: error.message });
@@ -46,7 +38,11 @@ const respondUserRequest = asyncHandler(async (req, res) => {
   const { status, data } = req.body;
   try {
     const requestId = req.params.id;
-    const request = await firestoreModel.respondUserRequest(requestId, status, data);
+    const request = await firestoreModel.respondUserRequest(
+      requestId,
+      status,
+      data
+    );
 
     res.status(200).json({ request });
   } catch (error) {
@@ -84,6 +80,12 @@ const updateFcmToken = asyncHandler(async (req, res) => {
   res.status(200).json({ fcm });
 });
 
+const readNotification = asyncHandler(async (req, res) => {
+  const notificationId = req.params.id;
+  const notification = await firestoreModel.readNotification(notificationId);
+  res.status(200).json({ notification });
+});
+
 module.exports = {
   createUser,
   getAllUsers,
@@ -95,4 +97,5 @@ module.exports = {
   getRequestNotification,
   getRequisitionResponseNotification,
   updateFcmToken,
+  readNotification
 };

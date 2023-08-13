@@ -25,6 +25,7 @@ function Button(props) {
     if (rounded === "sm") return "rounded-sm";
     if (rounded === "md") return "rounded-md";
     if (rounded === "lg") return "rounded-lg";
+    if (rounded === "xl") return "rounded-xl";
     if (rounded === "full") return "rounded-full";
     return "";
   };
