@@ -51,9 +51,9 @@ function RequestProgress({ request }) {
   };
 
   return (
-    <div className="relative m-auto flex max-w-4xl items-center justify-between gap-4">
+    <div className="relative m-auto flex max-w-4xl justify-between gap-4">
       {progressItems.map((item, index) => (
-        <div className="z-[1] w-48 text-center" key={index}>
+        <div className="z-[1] w-48  text-center" key={index}>
           <div
             className={`m-auto mb-2 w-fit rounded-full border-4  bg-white p-5 ${
               item.active

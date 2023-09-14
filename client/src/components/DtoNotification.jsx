@@ -19,7 +19,6 @@ function DtoNotification(props) {
           key={index}
           onClick={() => {
             selectedNotification(notification);
-            // console.log(notification.data.requestId)
           }}
         >
           <div className="flex items-center gap-2 p-2">
@@ -34,7 +33,7 @@ function DtoNotification(props) {
               </p>
               <p
                 className={`${
-                  !notification.read ? "" : "text-gray-500"
+                  !notification.read ? "font-semibold" : "text-gray-500"
                 }`}
               >
                 {notification?.body}

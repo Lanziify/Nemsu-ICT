@@ -24,17 +24,21 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchNotifications } from "../redux/notificationSlice";
 import { fetchRequests } from "../redux/requestSlice";
 import { readNotification } from "../redux/readNotificationSlice";
+import dtoLogo from "../assets/dtoLogo.svg";
 
 function Navbar(props) {
-  const { toggleDrawer, isCreatingRequest } = props;
+  const { isToggled, isCreatingRequest } = props;
   const { user, userProfile, logoutUser } = useAuth();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { notifications, unread } = useSelector((state) => state.notifications);
+  const { notifications, unreads, showUnreads } = useSelector(
+    (state) => state.notifications
+  );
   const { requests } = useSelector((state) => state.requests);
   const { isReadingNotifiation } = useSelector(
     (state) => state.readNotification
   );
+
   const [isProfileToggled, setIsProfileToggled] = useState(false);
   const [isNotificationToggled, setIsNotificationToggled] = useState(false);
   // Refs
@@ -93,6 +97,18 @@ function Navbar(props) {
     </>
   );
 
+  const handleNotificationClick = () => {
+    if (
+      window.innerWidth <= 428 ||
+      (window.innerWidth <= 428 && isNotificationToggled)
+    ) {
+      setIsNotificationToggled(false);
+      navigate("/notifications");
+    } else {
+      setIsNotificationToggled(!isNotificationToggled);
+    }
+  };
+
   const handleSelectedNotification = (notification) => {
     if (!notification.read) {
       dispatch(readNotification(notification.notificationId));
@@ -100,10 +116,10 @@ function Navbar(props) {
     const selected = requests.find((request) => {
       return request.requestId === notification.data.requestId;
     });
+    setIsNotificationToggled(false);
     navigate(`notifications/request/${selected.requestId}`, {
       state: selected,
     });
-    setIsNotificationToggled(false);
   };
 
   useEffect(() => {
@@ -142,11 +158,6 @@ function Navbar(props) {
     dispatch(fetchRequests());
   }, [isReadingNotifiation]);
 
-  if (window.innerWidth <= 425 && isNotificationToggled) {
-    navigate("/notifications");
-    setIsNotificationToggled(false);
-  }
-
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -181,15 +192,24 @@ function Navbar(props) {
       {/* Left side div */}
       <div className="mx-auto flex max-w-7xl justify-between px-4 py-2">
         <div className="flex items-center gap-4">
+          {/* Hamburger */}
           <div
             className="cursor-pointer rounded-full p-2 transition-all duration-300 ease-in-out hover:bg-gray-200 "
-            onClick={toggleDrawer}
+            onClick={isToggled}
           >
             <IoMenu size={24} />
           </div>
+
           <div className="flex items-center gap-2">
-            <div className="h-[36px] min-w-[36px] rounded-full border bg-gradient-to-br from-cyan-100 to-cyan-500"></div>
-            <span className="font-bold">Digital Transformation Office</span>
+            {/* <div className="h-[36px] min-w-[36px] rounded-full border bg-gradient-to-br from-cyan-100 to-cyan-500"></div> */}
+            <img
+              src={dtoLogo}
+              alt="DTO logo"
+              className="h-[24px] min-w-[24px]"
+            />
+            <span className="font-bold text-cyan-500 max-sm:hidden">
+              Digital Transformation Office
+            </span>
           </div>
         </div>
 
@@ -197,23 +217,19 @@ function Navbar(props) {
           {/* Notification */}
           <div
             className="relative flex items-center p-1"
-            onClick={() => {
-              setIsNotificationToggled(!isNotificationToggled);
-            }}
+            onClick={handleNotificationClick}
           >
             <div className="cursor-pointer" ref={notificationButton}>
               <div>
                 <IoNotificationsOutline size={24} />
               </div>
-              {unread ? (
+              {unreads ? (
                 <div
-                  className="no_selection absolute right-0 top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-cyan-500  text-white"
-                  onClick={() =>
-                    setIsNotificationToggled(!isNotificationToggled)
-                  }
+                  className="no_selection absolute right-0 top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-cyan-500 text-white"
+                  onClick={handleNotificationClick}
                 >
                   <span className="absolute -z-10 h-4 w-4 animate-ping rounded-full bg-cyan-500"></span>
-                  <p className="text-[10px]">{unread}</p>
+                  <p className="text-[10px]">{unreads}</p>
                 </div>
               ) : null}
             </div>
@@ -226,12 +242,12 @@ function Navbar(props) {
                   animate="animate"
                   exit="exit"
                   ref={notificationFloater}
-                  className="sm:max-md: absolute right-0 top-full -z-10 mt-4 flex max-h-[632px] w-[360px] flex-col overflow-hidden rounded-2xl bg-white/80 shadow-xl backdrop-blur-md  [&>div]:p-4"
+                  className="sm:max-md: absolute right-0 top-full -z-10 mt-4 flex max-h-[632px] w-[360px] flex-col overflow-hidden rounded-2xl bg-white shadow-xl"
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
                 >
-                  <div>
+                  <div className="px-4 pt-4">
                     <motion.h1
                       variants={popUpItem}
                       className="text-2xl font-bold"
@@ -239,7 +255,7 @@ function Navbar(props) {
                       Notifications
                     </motion.h1>
                   </div>
-                  <div className="overflow-y-auto">
+                  <div className="overflow-y-auto p-4">
                     <DtoNotification
                       notifications={notifications}
                       selectedNotification={(data) =>
@@ -247,7 +263,7 @@ function Navbar(props) {
                       }
                     />
                   </div>
-                  <div>
+                  <div className="py-2">
                     <ul className="flex justify-center gap-4 [&>li]:cursor-pointer [&>li]:rounded-xl">
                       <li>All</li>
                       <li>Unread</li>
@@ -286,7 +302,7 @@ function Navbar(props) {
                   animate="animate"
                   exit="exit"
                   ref={profileFloater}
-                  className="absolute right-0 top-full -z-10 mt-4 min-w-[280px] rounded-2xl bg-white/80 p-4 shadow-xl  backdrop-blur-md"
+                  className="absolute right-0 top-full -z-10 mt-4 min-w-[280px] rounded-2xl bg-white p-4 shadow-xl"
                 >
                   <div className="mb-2">
                     <div className="m-auto mb-2 h-[96px] max-w-[96px] rounded-full bg-gradient-to-br from-cyan-100 to-cyan-500"></div>

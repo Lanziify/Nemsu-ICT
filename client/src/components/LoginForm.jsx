@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import FormInput from "./FormInput";
-import logo from "../assets/logo.png";
+import dtoLogo from "../assets/dtoLogo.svg";
 import Button from "./Button";
 import Validation from "../utils/Validation";
+import Preloader from "./Preloader";
 
 function LoginForm() {
   const [values, setValues] = useState({
@@ -38,11 +39,13 @@ function LoginForm() {
   return (
     <>
       <form
-        className="flex min-w-0 w-96 flex-col items-center gap-4 rounded-xl bg-white px-8 pb-8 pt-6 shadow-sm"
+        className="flex w-96 min-w-0 flex-col items-center gap-4 rounded-xl bg-white px-8 pb-8 pt-6 shadow-sm"
         onSubmit={handleSubmit}
       >
-        {/* <img className="max-h-20 rounded-full" src={logo} /> */}
-        <div className="h-24 min-w-[96px] rounded-full border bg-gradient-to-br from-cyan-100 to-cyan-500"></div>
+        {/* <div className="h-24 min-w-[96px] rounded-full border bg-gradient-to-br from-cyan-100 to-cyan-500"></div> */}
+        <div className="rounded-full p-2">
+          <img src={dtoLogo} alt="DTO logo" className="h-14 w-14" />
+        </div>
         <span className="text-lg font-bold text-gray-500">
           Log in to your account
         </span>

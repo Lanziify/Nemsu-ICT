@@ -16,6 +16,11 @@ export const userItems = [
     icon: <MdHome size={24} />,
   },
   {
+    path: "/notifications",
+    name: "Notifications",
+    icon: <IoNotifications size={24} />,
+  },
+  {
     path: "/ongoing",
     name: "Ongoing Requests",
     icon: <MdEditDocument size={24} />,

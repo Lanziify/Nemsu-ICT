@@ -3,6 +3,7 @@ import { AiOutlineLoading } from "react-icons/ai";
 
 function Button(props) {
   const {
+    buttonRef,
     type,
     buttonText,
     primary,
@@ -55,17 +56,18 @@ function Button(props) {
     return `bg-transparent text-gray-500 ${transition} hover:bg-gray-300/50`;
   };
 
-  const buttonClasses = `flex ${getWidthClass()} items-center justify-center gap-2 px-4 py-2 font-semibold ${getRoundedClass()} ${getVariantClass()} disabled:opacity-50 outline-none`;
+  const buttonClasses = `flex ${getWidthClass()} items-center whitespace-nowrap justify-center gap-2 px-4 py-2 font-semibold ${getRoundedClass()} ${getVariantClass()} disabled:opacity-50 outline-none`;
 
   return (
     <button
+      ref={buttonRef}
       className={buttonClasses}
       type={type || "button"}
       onClick={onClick}
       disabled={disabled}
     >
       {iconStart && iconStart}
-      {buttonText || "Button"}
+      {buttonText}
       {iconEnd && iconEnd}
     </button>
   );

@@ -5,8 +5,7 @@ import { drawerAnimation, drawerItems } from "../animations/variants";
 import { adminItems, userItems } from "../utils/MenuItems";
 
 function Sidebar(props) {
-  const { isAdmin, isToggled } = props;
-  const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 960);
+  const { isAdmin, isToggled, setToggled } = props;
 
   const menuItems = () => {
     if (isAdmin) {
@@ -16,23 +15,11 @@ function Sidebar(props) {
     }
   };
 
-  useEffect(() => {
-    const handleResize = () => {
-      setShowSidebar(window.innerWidth >= 960);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
   return (
     <>
-      {showSidebar && isToggled && (
+      {isToggled && (
         <aside>
-          <div className="sticky top-[72px] flex min-h-[calc(100vh_-_88px)] w-[280px] flex-col justify-between overflow-hidden rounded-2xl bg-white p-4 text-sm text-gray-500 shadow-sm">
+          <div className="sticky top-[72px] flex min-h-[calc(100vh_-_88px)] w-[280px] flex-col justify-between overflow-hidden rounded-2xl bg-white text-gray-500 p-4 text-sm  shadow-sm">
             <div>
               {menuItems().map((item, index) => (
                 <motion.div variants={drawerItems} key={index}>
@@ -41,9 +28,9 @@ function Sidebar(props) {
                     key={index}
                     className={({ isActive }) => {
                       return (
-                        "flex items-center gap-2 rounded-xl p-2 font-medium transition-all " +
+                        "flex items-center gap-2 rounded-xl p-2 font-medium " +
                         (isActive
-                          ? `bg-cyan-500 text-white`
+                          ? `text-white ${isAdmin ? 'bg-gradient-to-r from-cyan-500 to-teal-200/50' : 'bg-cyan-500'}`
                           : "hover:bg-cyan-500/10")
                       );
                     }}

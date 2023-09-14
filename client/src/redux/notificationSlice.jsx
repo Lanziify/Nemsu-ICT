@@ -17,7 +17,8 @@ const notificationSlice = createSlice({
   name: "notifications",
   initialState: {
     notifications: [],
-    unread: 0,
+    unreads: 0,
+    showUnreads: false,
     isFetchingNotification: false,
   },
   extraReducers: (builder) => {
@@ -26,11 +27,12 @@ const notificationSlice = createSlice({
         state.isFetchingNotification = true;
       })
       .addCase(fetchNotifications.fulfilled, (state, action) => {
-        state.isFetchingNotification = false;
         state.notifications = action.payload;
-        state.unread = action.payload.filter(
+        state.unreads = action.payload.filter(
           (notification) => notification.read === false
         ).length;
+        state.showUnreads = true;
+        state.isFetchingNotification = false;
       })
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.isFetchingNotification = true;

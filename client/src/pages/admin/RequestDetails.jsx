@@ -24,7 +24,7 @@ export default function RequestDetails() {
   const location = useLocation();
 
   const [isResponding, setIsResponding] = useState(false);
-  const [tupple, setTupple] = useState([null, isResponding]);
+  const [tuple, setTuple] = useState([null, isResponding]);
   const [loading, setLoading] = useState(false);
 
   const requestDetails = [
@@ -147,11 +147,11 @@ export default function RequestDetails() {
     }
   };
 
-  if (tupple[1] != isResponding) {
-    setTupple([tupple[1], isResponding]);
+  if (tuple[1] != isResponding) {
+    setTuple([tuple[1], isResponding]);
   }
   
-  const direction = isResponding > tupple[0] ? 1 : -1;
+  const direction = isResponding > tuple[0] ? 1 : -1;
   
   if (location.state?.status != ACCEPTED && isResponding) {
     setIsResponding(false);
@@ -171,12 +171,12 @@ export default function RequestDetails() {
           >
             <motion.div
               variants={popUpItem}
-              className={`flex items-center justify-between rounded-2xl bg-white p-4 text-sm shadow-sm ${
+              className={`flex items-center justify-between gap-4 rounded-2xl bg-white p-4 text-sm shadow-sm ${
                 loading ? "[&>*]:animate-pulse" : ""
               }`}
             >
               <div
-                className="flex w-fit cursor-pointer items-center text-gray-400 duration-300 hover:text-black"
+                className="flex w-fit cursor-pointer whitespace-nowrap items-center text-gray-400 duration-300 hover:text-black"
                 onClick={() =>
                   !loading
                     ? navigate(
@@ -190,15 +190,15 @@ export default function RequestDetails() {
                 <MdChevronLeft size={24} />
                 <p>Request List</p>
               </div>
-              <ul className="flex gap-2 uppercase">
+              <ul className="flex gap-2 uppercase max-sm:text-xs overflow-hidden">
                 <li
                   label="Request id. "
-                  className="before:font-bold  before:content-[attr(label)]"
+                  className="before:font-bold overflow-hidden text-ellipsis whitespace-nowrap before:content-[attr(label)]"
                 >
                   {location.state.requestId}
                 </li>
-                <li className="border border-black"></li>
-                <li className="text-gray-400">{location.state?.status}</li>
+                <li className="border border-black max-sm:hidden"></li>
+                <li className="text-gray-400 max-sm:hidden">{location.state?.status}</li>
               </ul>
             </motion.div>
 
@@ -231,7 +231,7 @@ export default function RequestDetails() {
                 loading ? "[&>*]:animate-pulse" : ""
               }`}
             >
-              <div className="mb-2 flex h-9 items-center justify-between text-xs">
+              <div className="mb-4 flex h-9 items-center justify-between text-xs">
                 {location.state?.status === ACCEPTED && !isResponding ? (
                   <>
                     <h1 className="text-xl font-bold">Request Details</h1>

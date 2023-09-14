@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -13,21 +13,54 @@ import MenuDrawer from "../components/MenuDrawer";
 
 function ProtectedRoutes({ allowedUser }) {
   const { user, userProfile } = useAuth();
-  const [isToggled, setIsToggled] = useState(true);
+  const location = useLocation();
+  const [isSidebarToggled, setIsSidebarToggled] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 960);
   const [isCreatingRequest, setIsCreatingRequest] = useState(false);
 
   const handleDrawerToggle = () => {
-    setIsToggled(!isToggled);
+    setIsSidebarToggled(!isSidebarToggled);
   };
 
-  const setOpenSideBar = (close) => {
-    setIsToggled(close);
+  const setSidebar = (close) => {
+    setIsSidebarToggled(close);
   };
+
+  if (window.innerWidth <= 960 && isSidebarToggled && !showSidebar) {
+    document.body.classList.add("dto-menu-shown");
+  } else {
+    document.body.classList.remove("dto-menu-shown");
+  }
 
   const handleCreateRequest = () => {
     setIsCreatingRequest(true);
   };
+
+  // useEffect(() => {
+  //   window.scrollTo(0, 0);
+  // }, [location.pathname]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setShowSidebar(window.innerWidth >= 960);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!showSidebar) {
+      setIsSidebarToggled(!isSidebarToggled);
+    } else {
+      setIsSidebarToggled(true);
+    }
+  }, [showSidebar]);
   
+
   return allowedUser.includes(userProfile?.claims?.admin) ? (
     <>
       <div className="relative">
@@ -45,8 +78,9 @@ function ProtectedRoutes({ allowedUser }) {
         />
         <div className="relative flex min-h-screen flex-col bg-gray-100">
           <Navbar
-            toggleDrawer={handleDrawerToggle}
+            isToggled={handleDrawerToggle}
             isCreatingRequest={handleCreateRequest}
+            setToggled={setSidebar}
           />
           <AnimatePresence>
             {isCreatingRequest && (
@@ -56,14 +90,17 @@ function ProtectedRoutes({ allowedUser }) {
             )}
           </AnimatePresence>
           <div className="mx-auto flex h-full w-full max-w-7xl gap-4 p-4">
-            <Sidebar isToggled={isToggled} isAdmin={userProfile.claims.admin} />
-            <MenuDrawer
-              isToggled={isToggled}
+            <Sidebar
+              isToggled={showSidebar && isSidebarToggled}
               isAdmin={userProfile.claims.admin}
-              isMenuActive={setOpenSideBar}
             />
-            <main className="w-full min-w-0">
-              <Outlet />
+            <MenuDrawer
+              isToggled={!showSidebar && isSidebarToggled}
+              isAdmin={userProfile.claims.admin}
+              closeSidebar={setSidebar}
+            />
+            <main className="min-h-[calc(100vh_-_88px)] w-full min-w-0">
+              <Outlet context={{isAdmin: userProfile.claims.admin}}/>
             </main>
           </div>
         </div>

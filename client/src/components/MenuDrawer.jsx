@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { NavLink } from "react-router-dom";
-import { MdCancel } from "react-icons/md";
+import { IoClose } from "react-icons/io5";
 import { AnimatePresence, motion } from "framer-motion";
 import { drawerAnimation, drawerItems } from "../animations/variants";
 import { adminItems, userItems } from "../utils/MenuItems";
+import dtoLogo from "../assets/dtoLogo.svg";
+import Portal from "./Portal";
 
 function MenuDrawer(props) {
-  const { isAdmin, isToggled, isMenuActive } = props;
-  const [showMenu, setShowMenu] = useState(window.innerWidth <= 960);
+  const { isAdmin, isToggled, closeSidebar } = props;
 
   const menuItems = () => {
     if (isAdmin) {
@@ -17,54 +18,45 @@ function MenuDrawer(props) {
     }
   };
 
-  useEffect(() => {
-    const handleResize = () => {
-      setShowMenu(window.innerWidth <= 960);
-    };
-
-    // if (!showMenu) {
-    //   isMenuActive(false);
-    // }
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [showMenu]);
-
   return (
     <>
       <AnimatePresence>
-        {isToggled && showMenu && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, duration: 0.01 }}
-            exit={{ opacity: 0 }}
-            className="fixed left-0 top-0 z-10 flex h-full w-full items-start bg-black/20 text-sm text-white"
-            onClick={() => isMenuActive(false)}
-          >
+        {isToggled && (
+          <Portal>
             <motion.div
-              variants={drawerAnimation}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="bg-nemsu relative flex h-full w-[280px] shadow-2xl backdrop-blur-md"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, duration: 0.01 }}
+              exit={{ opacity: 0 }}
+              className="fixed left-0 top-0 z-10 flex h-full w-full items-start bg-black/50 text-sm"
+              onClick={() => closeSidebar(false)}
             >
-              <div className="flex flex-col justify-between bg-gradient-to-br from-cyan-500/20 to-gray-700 backdrop-blur-md">
+              <motion.div
+                variants={drawerAnimation}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="relative flex h-full w-[280px] flex-col justify-between rounded-br-2xl rounded-tr-2xl bg-white"
+              >
                 {/* Drawer header */}
                 <div
-                  className="absolute cursor-pointer right-0 top-0 m-4"
-                  onClick={() => isMenuActive(false)}
+                  className="absolute right-0 top-0 z-10 m-4 cursor-pointer"
+                  onClick={() => closeSidebar(false)}
                 >
-                  <MdCancel size={24} />
+                  <IoClose size={24} />
                 </div>
                 <div>
-                  <div className="flex h-[180px] items-center p-4">
-                    <h1 className="text-center text-lg font-black">
+                  <div className="flex h-[180px] flex-col items-center justify-center">
+                    <img
+                      src={dtoLogo}
+                      alt="DTO logo"
+                      className="z-10 mb-4 h-12"
+                    />
+                    <p className="font-semibold text-cyan-500">
                       Digital Transformation Office
-                    </h1>
+                    </p>
+                    {/* <h1 className="text-center text-lg font-black">
+                    Digital Transformation Office
+                  </h1> */}
                   </div>
                   <nav className="p-4">
                     {menuItems().map((item, index) => (
@@ -74,13 +66,13 @@ function MenuDrawer(props) {
                           key={index}
                           className={({ isActive }) => {
                             return (
-                              "flex items-center gap-2 rounded-md p-2 font-medium transition-all " +
+                              "flex items-center gap-2 rounded-xl p-2 font-medium transition-all " +
                               (isActive
-                                ? `bg-cyan-500/20`
-                                : "hover:bg-gray-500/10")
+                                ? `bg-cyan-500 text-white`
+                                : "text-gray-500 hover:bg-gray-500/10")
                             );
                           }}
-                          onClick={() => isMenuActive(false)}
+                          onClick={() => closeSidebar(false)}
                         >
                           <div>{item.icon}</div>
                           <div>{item.name}</div>
@@ -94,9 +86,9 @@ function MenuDrawer(props) {
                   © 2023 North Eastern Mindanao State University - Tagbina
                   Campus
                 </footer>
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
+          </Portal>
         )}
       </AnimatePresence>
     </>

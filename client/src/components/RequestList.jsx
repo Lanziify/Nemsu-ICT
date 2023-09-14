@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -9,52 +9,42 @@ import {
   MdChevronRight,
   MdCheckCircle,
   MdCancel,
-  MdDelete,
 } from "react-icons/md";
-// import { usePopper } from "@popperjs/core";
+import { createPopper } from "@popperjs/core";
 import { usePopper } from "react-popper";
-import { popUp, popUpItemRight, popUpRight } from "../animations/variants";
+import {
+  popUp,
+  popUpItem,
+  popUpItemRight,
+  popUpRight,
+} from "../animations/variants";
 import Button from "./Button";
 import Portal from "./Portal";
 import { ACCEPTED, CANCELED, COMPLETED, PENDING } from "../utils/status";
+import { update } from "react-spring";
 
 const ITEMS_PER_PAGE = 5; // Number of items to display per page
 
 function RequestList(props) {
-  const {
-    list,
-    requestId,
-    name,
-    email,
-    position,
-    office,
-    device,
-    brand,
-    model,
-    serial,
-    property,
-    status,
-    created,
-    operation,
-    admin,
-    handleResponse,
-  } = props;
-
-  const [sortedRequest, setSortedRequest] = useState();
-  const [option, setOption] = useState({ show: false, index: null });
-  const [filter, setFilter] = useState(false);
-  const [ascending, setAscending] = useState(false);
-  const [activeItems, setActiveItems] = useState({ ...props });
-  const [currentPage, setCurrentPage] = useState(1);
-
+  const { list, admin, handleResponse } = props;
   const navigate = useNavigate();
 
-  const [popperReference, setPopperReference] = useState();
-  const [popperElement, setPopperElement] = useState();
+  const [sortedRequest, setSortedRequest] = useState();
+  const [option, setOption] = useState({ show: false, id: null });
+  const [ascending, setAscending] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { styles, attributes } = usePopper(popperReference, popperElement, {
-    placement: "bottom-end",
-  });
+  const optionContainer = useRef(null);
+  const optionReference = useRef(null);
+  const optionElement = useRef(null);
+
+  const { styles, attributes } = usePopper(
+    optionReference.current,
+    optionElement.current
+    , {
+      placement: 'bottom-end'
+    }
+  );
 
   const sortRequestList = (item) => {
     const sortedList = [...getCurrentPageItems()].sort((a, b) => {
@@ -87,117 +77,64 @@ function RequestList(props) {
 
   const headerItems = [
     {
-      type: activeItems?.requestId,
+      type: props.requestId,
       data: "requestId",
       label: "Request Id",
     },
     {
-      type: activeItems.name,
+      type: props.name,
       data: "name",
       label: "Name",
     },
     {
-      type: activeItems.email,
+      type: props.email,
       data: "email",
       label: "Email",
     },
     {
-      type: activeItems.position,
+      type: props.position,
       data: "position",
       label: "Position",
     },
     {
-      type: activeItems.office,
+      type: props.office,
       data: "office",
       label: "Office",
     },
     {
-      type: activeItems.device,
+      type: props.device,
       data: "device",
       label: "Device",
     },
     {
-      type: activeItems.brand,
+      type: props.brand,
       data: "brand",
       label: "Brand",
     },
     {
-      type: activeItems.model,
+      type: props.model,
       data: "model",
       label: "Model",
     },
     {
-      type: activeItems.serial,
+      type: props.serial,
       data: "serial",
       label: "Serial No.",
     },
     {
-      type: activeItems.property,
+      type: props.property,
       data: "property",
       label: "Property No.",
     },
     {
-      type: activeItems.status,
+      type: props.status,
       data: "status",
       label: "Status",
     },
     {
-      type: activeItems.created,
+      type: props.created,
       data: "createdAt",
       label: "Created",
-    },
-  ];
-
-  const filterItems = [
-    {
-      title: "Name",
-      item: "name",
-      value: activeItems.name,
-    },
-    {
-      title: "Email",
-      item: "email",
-      value: activeItems.email,
-    },
-    {
-      title: "Position",
-      item: "position",
-      value: activeItems.position,
-    },
-    {
-      title: "Office",
-      item: "office",
-      value: activeItems.office,
-    },
-    {
-      title: "Device",
-      item: "device",
-      value: activeItems.device,
-    },
-    {
-      title: "Brand",
-      item: "brand",
-      value: activeItems.brand,
-    },
-    {
-      title: "Model",
-      item: "model",
-      value: activeItems.model,
-    },
-    {
-      title: "Serial No.",
-      item: "serial",
-      value: activeItems.serial,
-    },
-    {
-      title: "Property No.",
-      item: "property",
-      value: activeItems.property,
-    },
-    {
-      title: "Status",
-      item: "status",
-      value: activeItems.status,
     },
   ];
 
@@ -205,7 +142,7 @@ function RequestList(props) {
     if (item.type) {
       return (
         <th
-          className={`p-4 text-center sm:max-md:hidden ${!list && "border-b "}`}
+          className={`p-4 text-center max-sm:hidden ${!list && "border-b "}`}
           key={index}
         >
           <div
@@ -228,13 +165,13 @@ function RequestList(props) {
       return (
         <td
           cell={`${item.label}: `}
-          className={`overflow-hidden text-ellipsis whitespace-nowrap px-2 py-4 text-center before:text-gray-500 ${
+          className={`px-2 py-4 text-center before:text-gray-500 ${
             item.data != "status"
               ? ""
               : (request[item.data] === PENDING && "text-yellow-500") ||
                 (request[item.data] === ACCEPTED && "text-green-500") ||
                 (request[item.data] === COMPLETED && "text-cyan-500")
-          } before:font-bold sm:max-md:flex sm:max-md:justify-between sm:max-md:px-0 sm:max-md:py-1 sm:max-md:before:content-[attr(cell)]`}
+          } before:font-bold max-sm:flex max-sm:justify-between max-sm:px-0 max-sm:py-1 max-sm:before:content-[attr(cell)]`}
           key={index}
         >
           {item.data != "createdAt"
@@ -245,19 +182,23 @@ function RequestList(props) {
     }
   };
 
-  const handleFilterHeader = (e) => {
-    setActiveItems({
-      ...activeItems,
-      [e.target.name]: !activeItems[e.target.name],
-    });
-  };
-
   const handleListDisplay = () => {
     if (!sortedRequest) {
       return getCurrentPageItems();
     } else {
       return sortedRequest;
     }
+  };
+
+  const handleOptionClick = (e, request) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // optionReference.current = request.requestId;
+    !option.show && !option.id
+      ? setOption({ show: true, id: request.requestId })
+      : option.id === request.requestId
+      ? setOption({})
+      : setOption({ show: true, id: request.requestId });
   };
 
   const getCurrentPageItems = () => {
@@ -278,172 +219,117 @@ function RequestList(props) {
     );
   };
 
-  useEffect(() => {
-    const data = window.localStorage.getItem("filteredTable");
-    setActiveItems(JSON.parse(data));
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(
-      "filteredTable",
-      JSON.stringify(activeItems, undefined, 2)
-    );
-  }, [activeItems]);
-
   const handleRequest = (request) => {
     navigate(`request/${request.requestId}`, { state: request });
   };
 
+  console.log(optionReference.current)
+
+
+  // useEffect(() => {
+  //   const outsideClick = (e) => {
+  //     if (!optionContainer.current.contains(e.target)) {
+  //       console.log("hide");
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", outsideClick);
+  //   return () => {
+  //     document.removeEventListener("mousedown", outsideClick);
+  //   };
+  // }, []);
+
   return (
-    <div className="relative flex min-w-fit flex-col">
-      <motion.table
-        variants={popUp}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        className="table-auto border-collapse rounded-md"
-      >
-        {/* <caption className="text-2xl font-bold p-2 md:max-lg:hidden sm:max-md:block sm:max-md:p-4 text-cyan-500">Request List</caption> */}
+    <div className="flex min-w-fit flex-col">
+      <table className="table-auto border-collapse rounded-md">
+        {/* <caption className="text-2xl font-bold p-2 md:max-lg:hidden max-sm:block max-sm:p-4 text-cyan-500">Request List</caption> */}
         <thead>
-          <tr className="border-b sm:max-md:border-0">
-            {/* <th className="p-2 text-center sm:max-md:hidden">No.</th> */}
+          <tr className="border-b max-sm:border-0">
+            {/* <th className="p-2 text-center max-sm:hidden">No.</th> */}
 
             {/* Header Items */}
             {headerItems.map((item, index) => tableHeader(item, index))}
-
-            {/* Filter Feature */}
-            {admin && (
-              <th
-                className={`p-2 text-center sm:max-md:hidden ${
-                  filter ? "sticky right-0 top-0 bg-white" : ""
-                } `}
-              >
-                <div
-                  ref={setPopperReference}
-                  className="no_selection m-auto w-fit cursor-pointer rounded-full p-1 duration-300 hover:bg-gray-200"
-                  onClick={() => setFilter(!filter)}
-                >
-                  <MdFilterList size={20} />
-                </div>
-                {filter && (
-                  <Portal>
-                    <div
-                      ref={setPopperElement}
-                      className="rounded-md bg-gray-200 px-4 py-2 font-normal shadow-sm"
-                      style={styles.popper}
-                      {...attributes.popper}
-                    >
-                      {filterItems.map((item, index) => (
-                        <div className="flex gap-2" key={index}>
-                          <input
-                            className="accent-cyan-600"
-                            type="checkbox"
-                            name={item.item}
-                            id={index}
-                            // value={item.value}
-                            onChange={handleFilterHeader}
-                            checked={item.value}
-                          />
-                          <p>{item.title}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </Portal>
-                )}
-              </th>
-            )}
           </tr>
         </thead>
-        <tbody className="sm:max-md:flex sm:max-md:flex-col sm:max-md:gap-4">
+
+        <tbody className="max-sm:flex max-sm:flex-col max-sm:gap-4">
           {handleListDisplay().length != 0 ? (
             <>
               {handleListDisplay().map((request, index) => (
                 <tr
                   key={index}
-                  className="cursor-pointer border-b duration-150 last:border-0 hover:bg-gray-500/10 sm:max-md:block sm:max-md:rounded-2xl sm:max-md:border sm:max-md:p-4 sm:max-md:last:border"
+                  className="cursor-pointer border-b duration-150 last:border-0 hover:bg-gray-500/10 max-sm:block max-sm:rounded-2xl max-sm:border max-sm:p-4 max-sm:last:border"
                   onClick={() => handleRequest(request)}
                 >
-                  {/* <td className="p-1 text-center font-semibold">{index + 1}</td> */}
-
                   {headerItems.map((item, index) =>
                     tableData(item, request, index)
                   )}
+
                   {admin && (
-                    <td className="relative justify-between py-1 sm:max-md:hidden">
+                    <td className="pr-4 max-sm:hidden">
                       <div
-                        className="no_selection m-auto w-fit rounded-md bg-gray-200 p-1 text-xs duration-300 hover:bg-gray-300 sm:max-md:m-0 sm:max-md:hidden"
+                        ref={optionReference}
+                        className={`${request.requestId} no_selection m-auto w-fit rounded-md p-1 text-xs duration-300 hover:bg-gray-300 max-sm:m-0 max-sm:hidden`}
                         onClick={(e) => {
-                          e.stopPropagation();
-                          !option.show && !option.index
-                            ? setOption({ show: true, index: index })
-                            : index === option.index
-                            ? setOption({})
-                            : setOption({ show: true, index: index });
+                          handleOptionClick(e, request);
                         }}
                       >
                         <MdMoreHoriz size={18} />
-                        <AnimatePresence>
-                          {option.show && option.index == index && (
-                            <motion.div
-                              variants={popUpRight}
-                              initial="initial"
-                              animate="animate"
-                              exit="exit"
-                              className="absolute bottom-0 right-full  top-0 flex items-center gap-2 rounded-md"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {request.status === PENDING && (
-                                <>
-                                  <motion.div variants={popUpItemRight}>
-                                    <Button
-                                      success
-                                      rounded="md"
-                                      iconStart={<MdCheckCircle size={18} />}
-                                      buttonText="Accept"
-                                      onClick={() => {
-                                        handleResponse(
-                                          request.requestId,
-                                          ACCEPTED
-                                        );
-                                        setOption({});
-                                      }}
-                                    />
-                                  </motion.div>
-                                  <motion.div variants={popUpItemRight}>
-                                    <Button
-                                      danger
-                                      rounded="md"
-                                      iconStart={<MdCancel size={18} />}
-                                      buttonText="Cancel"
-                                      onClick={() => {
-                                        handleResponse(
-                                          request.requestId,
-                                          CANCELED
-                                        );
-                                        setOption({});
-                                      }}
-                                    />
-                                  </motion.div>
-                                </>
-                              )}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
                       </div>
+                      {/* <Portal> */}
+                      <div
+                        ref={optionElement}
+                        className={`z-[1] rounded-xl border bg-white p-3 ${
+                          option.show && request.requestId === option.id
+                            ? "visible opacity-100"
+                            : "invisible hidden opacity-0"
+                        }`}
+                        style={styles.popper}
+                        {...attributes.popper}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {request.status === PENDING && (
+                          <>
+                            <Button
+                              success
+                              width="full"
+                              rounded="md"
+                              iconStart={<MdCheckCircle size={18} />}
+                              buttonText="Accept"
+                              onClick={() => {
+                                handleResponse(request.requestId, ACCEPTED);
+                                setOption({});
+                              }}
+                            />
+                            <Button
+                              danger
+                              width="full"
+                              rounded="md"
+                              iconStart={<MdCancel size={18} />}
+                              buttonText="Cancel"
+                              onClick={() => {
+                                handleResponse(request.requestId, CANCELED);
+                                setOption({});
+                              }}
+                            />
+                          </>
+                        )}
+                      </div>
+                      {/* </Portal> */}
                     </td>
                   )}
                 </tr>
               ))}
             </>
           ) : (
-            <tr className="text-center sm:max-md:flex">
-              <td className="p-4 sm:max-md:flex-1" colSpan="100%">
+            <tr className="text-center max-sm:flex">
+              <td className="p-4 max-sm:flex-1" colSpan="100%">
                 There are no repair requests to display
               </td>
             </tr>
           )}
         </tbody>
-      </motion.table>
+      </table>
 
       <div className="sticky bottom-0 right-0 top-0 mt-2 flex gap-2 self-end">
         <p className="px-4 py-2 text-xs">
