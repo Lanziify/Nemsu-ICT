@@ -40,9 +40,9 @@ function RequestList(props) {
 
   const { styles, attributes } = usePopper(
     optionReference.current,
-    optionElement.current
-    , {
-      placement: 'bottom-end'
+    optionElement.current,
+    {
+      placement: "bottom-end",
     }
   );
 
@@ -58,8 +58,8 @@ function RequestList(props) {
           : -1;
       } else {
         return ascending
-          ? b[item]._seconds - a[item]._seconds
-          : a[item]._seconds - b[item]._seconds;
+          ? b[item].seconds - a[item].seconds
+          : a[item].seconds - b[item].seconds;
       }
     });
     return setSortedRequest(sortedList);
@@ -176,7 +176,7 @@ function RequestList(props) {
         >
           {item.data != "createdAt"
             ? request[item.data]
-            : convertCreatedDate(request[item.data]?._seconds)}
+            : convertCreatedDate(request[item.data]?.seconds)}
         </td>
       );
     }
@@ -220,11 +220,10 @@ function RequestList(props) {
   };
 
   const handleRequest = (request) => {
-    navigate(`request/${request.requestId}`, { state: request });
+    navigate(`request/${request.requestId}`);
   };
 
-  console.log(optionReference.current)
-
+  // console.log(optionReference.current)
 
   // useEffect(() => {
   //   const outsideClick = (e) => {
@@ -350,7 +349,7 @@ function RequestList(props) {
           className="rounded-md p-2 duration-300 hover:bg-gray-200 disabled:text-gray-300"
           onClick={handlePaginationNext}
           disabled={
-            currentPage === 1 ||
+            currentPage > list.length ||
             currentPage === Math.ceil(list.length / ITEMS_PER_PAGE)
           }
         >

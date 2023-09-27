@@ -19,24 +19,24 @@ function RequestProgress({ request }) {
     {
       title: "Form Submitted",
       icon: <FaClipboardList size={32} />,
-      date: convertCreatedDate(request?.createdAt._seconds),
+      date: convertCreatedDate(request?.createdAt.seconds),
       active: true,
     },
     {
       title: "Details Accepted",
       icon: <FaThumbsUp size={32} />,
-      date: request?.updatedAt?._seconds
-        ? convertCreatedDate(request?.updatedAt?._seconds)
+      date: request?.updatedAt?.seconds
+        ? convertCreatedDate(request?.updatedAt?.seconds)
         : "---",
-      active: request?.updatedAt?._seconds ? true : false,
+      active: request?.updatedAt?.seconds ? true : false,
     },
     {
       title: "Request Completed",
       icon: <FaCheck size={32} />,
-      date: request?.completedAt?._seconds
-        ? convertCreatedDate(request?.completedAt?._seconds)
+      date: request?.completedAt?.seconds
+        ? convertCreatedDate(request?.completedAt?.seconds)
         : "---",
-      active: request?.completedAt?._seconds ? true : false,
+      active: request?.completedAt?.seconds ? true : false,
     },
   ];
 

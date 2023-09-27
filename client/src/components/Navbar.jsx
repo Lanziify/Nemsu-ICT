@@ -22,7 +22,6 @@ import { fadeDefault, popUp, popUpItem } from "../animations/variants";
 import ApiService from "../api/apiService";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchNotifications } from "../redux/notificationSlice";
-import { fetchRequests } from "../redux/requestSlice";
 import { readNotification } from "../redux/readNotificationSlice";
 import dtoLogo from "../assets/dtoLogo.svg";
 
@@ -128,7 +127,6 @@ function Navbar(props) {
       onMessage(messaging, (payload) => {
         const ringtone = new Audio(notificationRingtone);
         dispatch(fetchNotifications(user.uid));
-        dispatch(fetchRequests());
 
         toast(
           <ToastifyNotification
@@ -155,7 +153,7 @@ function Navbar(props) {
 
   useEffect(() => {
     dispatch(fetchNotifications(user.uid));
-    dispatch(fetchRequests());
+    // dispatch(fetchRequests());
   }, [isReadingNotifiation]);
 
   useEffect(() => {

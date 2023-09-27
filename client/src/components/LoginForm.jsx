@@ -5,15 +5,18 @@ import dtoLogo from "../assets/dtoLogo.svg";
 import Button from "./Button";
 import Validation from "../utils/Validation";
 import Preloader from "./Preloader";
+import { useDispatch } from "react-redux";
+import { setDtoLoading } from "../redux/dtoLoadingSlice";
 
 function LoginForm() {
+  const { loginUser } = useAuth();
   const [values, setValues] = useState({
     email: "",
     password: "",
   });
   const [firebaseError, setFirebaseError] = useState();
   const [error, setError] = useState({});
-  const { loginUser } = useAuth();
+  const dispatch = useDispatch()
 
   // Assign the inputs of the selected field to the target name of state values
   // Clear the error when input changes
@@ -29,6 +32,7 @@ function LoginForm() {
       setError(formErrors);
     } else {
       try {
+        dispatch(setDtoLoading(true))
         await loginUser(values.email, values.password);
       } catch (error) {
         setFirebaseError("Incorrect email address or password");

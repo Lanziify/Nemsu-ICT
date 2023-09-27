@@ -2,8 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import RequestList from "../../components/RequestList";
 import ApiService from "../../api/apiService";
 import { NavLink, useLocation, useOutletContext } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchRequests } from "../../redux/requestSlice";
+import { useSelector } from "react-redux";
 import {
   MdHourglassEmpty,
   MdThumbUpOffAlt,
@@ -24,18 +23,15 @@ import Swal from "sweetalert2";
 
 import { ACCEPTED, CANCELED, COMPLETED, PENDING } from "../../utils/status";
 import { usePopper } from "react-popper";
+import Preloader from "../../components/Preloader";
+import { query } from "firebase/firestore";
 
 export default function Requests() {
   const { isAdmin } = useOutletContext();
   const location = useLocation();
-  const dispatch = useDispatch();
 
-  const { requests } = useSelector((state) => state.requests);
-  const { isFetchingNotification } = useSelector(
-    (state) => state.notifications
-  );
+  const { requests, loading } = useSelector((state) => state.requests);
   const [searchedRequest, setSearchedRequest] = useState();
-  const [isResponding, setIsResponding] = useState(false);
 
   const [showFilter, setShowFilter] = useState(false);
   const [activeItems, setActiveItems] = useState({
@@ -45,10 +41,10 @@ export default function Requests() {
     position: true,
     office: true,
     device: true,
-    brand: true,
-    model: true,
-    serial: true,
-    property: true,
+    brand: false,
+    model: false,
+    serial: false,
+    property: false,
     status: true,
     created: true,
   });
@@ -159,37 +155,28 @@ export default function Requests() {
   };
 
   const handleRequestSearch = (search, list) => {
+    const query = search.toLowerCase()
     const result = list.filter((item) => {
       return (
-        item.requestId.toLowerCase().includes(search.toLowerCase()) ||
-        item.name.toLowerCase().includes(search.toLowerCase()) ||
-        item.device.toLowerCase().includes(search.toLowerCase()) ||
-        item.brand.toLowerCase().includes(search.toLowerCase())
+        item.requestId.toLowerCase().includes(query) ||
+        item.name.toLowerCase().includes(query) ||
+        item.device.toLowerCase().includes(query) ||
+        item.brand.toLowerCase().includes(query)
       );
     });
     search ? setSearchedRequest(result) : setSearchedRequest();
   };
 
-  const getSortList = () => {
-    if (searchedRequest) {
-      return [...searchedRequest];
-    } else {
-      return [...requests];
+  const filteredList = (searchedRequest ? searchedRequest : requests).filter(
+    (item) => {
+      return item.status.toLowerCase().includes(
+        location.pathname
+          .split("/")
+          .filter((segment) => segment !== "")
+          .pop()
+      );
     }
-  };
-
-  const sortedList = getSortList().sort((a, b) => {
-    return b.createdAt._seconds - a.createdAt._seconds;
-  });
-
-  const filteredList = [...sortedList].filter((item) => {
-    return item.status.toLowerCase().includes(
-      location.pathname
-        .split("/")
-        .filter((segment) => segment !== "")
-        .pop()
-    );
-  });
+  );
 
   const handleResponse = async (requestId, status) => {
     try {
@@ -207,21 +194,21 @@ export default function Requests() {
           reverseButtons: true,
         }).then((result) => {
           if (result.isConfirmed) {
-            setIsResponding(true);
+            // setIsResponding(true);
             ApiService.createResponse(requestId, status).then(() => {
-              setIsResponding(false);
+              // setIsResponding(false);
             });
           }
           if (result.isDismissed) {
-            setIsResponding(false);
+            // setIsResponding(false);
           }
         });
         return;
       }
 
-      setIsResponding(true);
+      // setIsResponding(true);
       await ApiService.createResponse(requestId, status);
-      setIsResponding(false);
+      // setIsResponding(false);
     } catch (error) {
       console.log(error);
     }
@@ -233,10 +220,6 @@ export default function Requests() {
       [e.target.name]: !activeItems[e.target.name],
     });
   };
-
-  useEffect(() => {
-    dispatch(fetchRequests());
-  }, [isFetchingNotification, isResponding]);
 
   useEffect(() => {
     const data = window.localStorage.getItem("filteredTable");
@@ -263,7 +246,9 @@ export default function Requests() {
     };
   }, []);
 
-  return (
+
+
+  return !loading ? (
     <>
       <div className="mb-4 grid grid-cols-3 gap-4 [&>div]:rounded-2xl [&>div]:shadow-sm [&>div]:max-sm:col-span-full">
         <div className="col-span-2 h-48 flex-1 overflow-hidden bg-white p-4 max-sm:p-0">
@@ -332,9 +317,9 @@ export default function Requests() {
               className="w-full rounded-full bg-white p-2 pl-[48px] text-gray-400 shadow-sm outline-none"
               type="text"
               placeholder="Search"
-              onChange={(e) =>
-                handleRequestSearch(e.target.value, filteredList)
-              }
+              onChange={(e) => {
+                handleRequestSearch(e.target.value, filteredList);
+              }}
             />
           </div>
           {isAdmin && (
@@ -350,7 +335,7 @@ export default function Requests() {
               </div>
               <div
                 ref={popperElement}
-                className={`z-[1] mt-2 rounded-md border bg-white p-3  ${
+                className={`z-[1] mt-2 rounded-2xl border bg-white p-3  ${
                   showFilter ? "visible opacity-100" : "invisible opacity-0"
                 } transition-all duration-150`}
                 style={styles.popper}
@@ -389,6 +374,10 @@ export default function Requests() {
           </AnimatePresence>
         </div>
       </div>
+    </>
+  ) : (
+    <>
+      <Preloader />
     </>
   );
 }

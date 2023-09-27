@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdChevronLeft } from "react-icons/md";
 import { FaPencilAlt, FaCheck, FaSearch } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -18,94 +18,110 @@ import {
 } from "../../animations/variants";
 import ResizablePanel from "../../components/ResizablePanel";
 import { PENDING, ACCEPTED, COMPLETED, CANCELED } from "../../utils/status";
+import { useDocumentData } from "react-firebase-hooks/firestore";
+import { firestore } from "../../config/firebase-config";
+import { doc } from "firebase/firestore";
+import Preloader from "../../components/Preloader";
 
 export default function RequestDetails() {
   const navigate = useNavigate();
   const location = useLocation();
+  const currentRequestId = location.pathname.substring(
+    location.pathname.lastIndexOf("/") + 1
+  );
+
+  const dtoRequestsDocRef = doc(firestore, "requests", currentRequestId);
+  const [request, fetching, error] =
+    useDocumentData(dtoRequestsDocRef);
+
+  const stringyfiedRequest = JSON.stringify({  request });
+  const parsedRequest = JSON.parse(stringyfiedRequest);
+  const currentRequest = parsedRequest.request
 
   const [isResponding, setIsResponding] = useState(false);
   const [tuple, setTuple] = useState([null, isResponding]);
   const [loading, setLoading] = useState(false);
 
+
   const requestDetails = [
     {
       cell: "Request Id",
-      data: location.state?.requestId,
+      data: request?.requestId,
     },
     {
       cell: "User Id",
-      data: location.state?.uid,
+      data: currentRequest?.uid,
     },
     {
       cell: "Name",
-      data: location.state?.name,
+      data: currentRequest?.name,
     },
     {
       cell: "Email",
-      data: location.state?.email,
+      data: currentRequest?.email,
     },
     {
       cell: "Position",
-      data: location.state?.position,
+      data: currentRequest?.position,
     },
     {
       cell: "Office",
-      data: location.state?.office,
+      data: currentRequest?.office,
     },
     {
       cell: "Device Type",
-      data: location.state?.device,
+      data: currentRequest?.device,
     },
     {
       cell: "Brand",
-      data: location.state?.brand,
+      data: currentRequest?.brand,
     },
     {
       cell: "Brand Model",
-      data: location.state?.model,
+      data: currentRequest?.model,
     },
     {
       cell: "Serial Number",
-      data: location.state?.serial,
+      data: currentRequest?.serial,
     },
     {
       cell: "Property Number",
-      data: location.state?.property,
+      data: currentRequest?.property,
     },
     {
       cell: "Status",
-      data: location.state?.status,
+      data: currentRequest?.status,
     },
     {
       cell: "Updated",
-      data: location.state?.updatedAt?._seconds
-        ? getTimeAgo(location.state?.updatedAt?._seconds)
+      data: currentRequest?.updatedAt?.seconds
+        ? getTimeAgo(currentRequest?.updatedAt?.seconds)
         : "---",
     },
     {
       cell: "Date Requested",
-      data: convertCreatedDate(location.state?.createdAt?._seconds),
+      data: convertCreatedDate(currentRequest?.createdAt?.seconds),
     },
     {
       cell: "Defects/Complaints",
-      data: location.state?.complaints,
+      data: currentRequest?.complaints,
     },
   ];
 
   const requestResponse = [
     {
       cell: "Action taken",
-      data: location.state?.actionTaken,
+      data: currentRequest?.actionTaken,
     },
     {
       cell: "Recommendation",
-      data: location.state?.recommendation
-        ? location.state?.recommendation
+      data: currentRequest?.recommendation
+        ? currentRequest?.recommendation
         : "N/A",
     },
     {
       cell: "Date completed",
-      data: convertCreatedDate(location.state?.completedAt?._seconds),
+      data: convertCreatedDate(currentRequest?.completedAt?.seconds),
     },
   ];
 
@@ -150,17 +166,16 @@ export default function RequestDetails() {
   if (tuple[1] != isResponding) {
     setTuple([tuple[1], isResponding]);
   }
-  
+
   const direction = isResponding > tuple[0] ? 1 : -1;
-  
-  if (location.state?.status != ACCEPTED && isResponding) {
+
+  if (currentRequest?.status != ACCEPTED && isResponding) {
     setIsResponding(false);
   }
 
-
   return (
     <>
-      {location.state ? (
+      {currentRequest ? (
         <MotionConfig transition={{ duration: 0.5 }}>
           <motion.div
             variants={popUp}
@@ -176,7 +191,7 @@ export default function RequestDetails() {
               }`}
             >
               <div
-                className="flex w-fit cursor-pointer whitespace-nowrap items-center text-gray-400 duration-300 hover:text-black"
+                className="flex w-fit cursor-pointer items-center whitespace-nowrap text-gray-400 duration-300 hover:text-black"
                 onClick={() =>
                   !loading
                     ? navigate(
@@ -190,15 +205,17 @@ export default function RequestDetails() {
                 <MdChevronLeft size={24} />
                 <p>Request List</p>
               </div>
-              <ul className="flex gap-2 uppercase max-sm:text-xs overflow-hidden">
+              <ul className="flex gap-2 overflow-hidden uppercase max-sm:text-xs">
                 <li
                   label="Request id. "
-                  className="before:font-bold overflow-hidden text-ellipsis whitespace-nowrap before:content-[attr(label)]"
+                  className="overflow-hidden text-ellipsis whitespace-nowrap before:font-bold before:content-[attr(label)]"
                 >
-                  {location.state.requestId}
+                  {currentRequest.requestId}
                 </li>
                 <li className="border border-black max-sm:hidden"></li>
-                <li className="text-gray-400 max-sm:hidden">{location.state?.status}</li>
+                <li className="text-gray-400 max-sm:hidden">
+                  {currentRequest?.status}
+                </li>
               </ul>
             </motion.div>
 
@@ -209,15 +226,17 @@ export default function RequestDetails() {
               }`}
             >
               <ResizablePanel direction={direction}>
-                {((!isResponding && location.state?.status != CANCELED) ||
-                  (isResponding && location.state?.status != ACCEPTED)) && (
+                {((!isResponding &&
+                  currentRequest?.status != CANCELED) ||
+                  (isResponding &&
+                    currentRequest?.status != ACCEPTED)) && (
                   <motion.div className="p-6">
-                    <RequestProgress request={location.state} />
+                    <RequestProgress request={currentRequest} />
                   </motion.div>
                 )}
-                {location.state.status === ACCEPTED && isResponding && (
+                {currentRequest.status === ACCEPTED && isResponding && (
                   <ResponseForm
-                    requestId={location.state.requestId}
+                    requestId={currentRequest.requestId}
                     activeForm={setIsResponding}
                     setLoading={setLoading}
                   />
@@ -232,7 +251,8 @@ export default function RequestDetails() {
               }`}
             >
               <div className="mb-4 flex h-9 items-center justify-between text-xs">
-                {location.state?.status === ACCEPTED && !isResponding ? (
+                {currentRequest?.status === ACCEPTED &&
+                !isResponding ? (
                   <>
                     <h1 className="text-xl font-bold">Request Details</h1>
                     <Button
@@ -262,7 +282,7 @@ export default function RequestDetails() {
                 </div>
               ))}
 
-              {location.state?.status === PENDING && (
+              {currentRequest?.status === PENDING && (
                 <div className="mt-4 flex justify-between gap-4">
                   <Button
                     secondary
@@ -270,7 +290,10 @@ export default function RequestDetails() {
                     width="full"
                     buttonText="Cancel Request"
                     onClick={() =>
-                      handleResponse(location.state?.requestId, CANCELED)
+                      handleResponse(
+                        currentRequest?.requestId,
+                        CANCELED
+                      )
                     }
                     disabled={loading}
                   />
@@ -280,7 +303,10 @@ export default function RequestDetails() {
                     width="full"
                     buttonText="Accept Request"
                     onClick={() =>
-                      handleResponse(location.state?.requestId, ACCEPTED)
+                      handleResponse(
+                        currentRequest?.requestId,
+                        ACCEPTED
+                      )
                     }
                     disabled={loading}
                   />
@@ -289,7 +315,7 @@ export default function RequestDetails() {
             </motion.div>
 
             <AnimatePresence>
-              {location.state?.status === COMPLETED ? (
+              {currentRequest?.status === COMPLETED ? (
                 <motion.div
                   variants={popUpItem}
                   className="rounded-2xl bg-cyan-500 p-6 text-sm text-white shadow-sm"
@@ -315,6 +341,8 @@ export default function RequestDetails() {
             </AnimatePresence>
           </motion.div>
         </MotionConfig>
+      ) : fetching && !error ? (
+        <Preloader />
       ) : (
         <Notfound />
       )}

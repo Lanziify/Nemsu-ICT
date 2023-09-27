@@ -23,7 +23,7 @@ export default function HeroHeader() {
     <header
       className={`no_selection fixed top-0 z-10 w-full text-sm text-gray-500 ${
         headerBackground ? "bg-white shadow-sm" : ""
-      }`}
+      } transition-all duration-300`}
     >
       <div className="mx-auto flex h-[56px] max-w-7xl items-center justify-between px-4 py-2">
         <div className="flex items-center gap-4">

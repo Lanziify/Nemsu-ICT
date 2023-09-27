@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -10,10 +10,25 @@ import "react-toastify/dist/ReactToastify.css";
 import { fadeDefault } from "../animations/variants";
 import RequestForm from "../components/RequestForm";
 import MenuDrawer from "../components/MenuDrawer";
+import { useCollectionData } from "react-firebase-hooks/firestore";
+import { collection, orderBy, query } from "firebase/firestore";
+import { firestore } from "../config/firebase-config";
+import { useDispatch, useSelector } from "react-redux";
+import { setData, setLoading, setError } from "../redux/requestSlice";
+import { setDtoLoading } from "../redux/dtoLoadingSlice";
+import Preloader from "../components/Preloader";
 
 function ProtectedRoutes({ allowedUser }) {
   const { user, userProfile } = useAuth();
-  const location = useLocation();
+  const dispatch = useDispatch();
+
+  const dtoRequestsRef = collection(firestore, "requests");
+  const requestQuery = query(dtoRequestsRef, orderBy("createdAt", "desc"));
+  const [list, loading, error] = useCollectionData(requestQuery);
+
+  const { isDtoLoading } = useSelector((state) => state.dtoLoading);
+
+
   const [isSidebarToggled, setIsSidebarToggled] = useState(true);
   const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 960);
   const [isCreatingRequest, setIsCreatingRequest] = useState(false);
@@ -36,9 +51,18 @@ function ProtectedRoutes({ allowedUser }) {
     setIsCreatingRequest(true);
   };
 
-  // useEffect(() => {
-  //   window.scrollTo(0, 0);
-  // }, [location.pathname]);
+  useEffect(() => {
+    try {
+      const stringyfiedList = JSON.stringify(list);
+      dispatch(setLoading(loading))
+      if (stringyfiedList) {
+        const parsedList = JSON.parse(stringyfiedList);
+        dispatch(setData(parsedList));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }, [list]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -59,7 +83,18 @@ function ProtectedRoutes({ allowedUser }) {
       setIsSidebarToggled(true);
     }
   }, [showSidebar]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      dispatch(setDtoLoading(false));
+    }, 3000);
+  }, [isDtoLoading]);
   
+  // Render the preloader if isLoading is true
+  if (isDtoLoading && loading) {
+    return <Preloader />;
+  }
+
 
   return allowedUser.includes(userProfile?.claims?.admin) ? (
     <>
@@ -99,8 +134,8 @@ function ProtectedRoutes({ allowedUser }) {
               isAdmin={userProfile.claims.admin}
               closeSidebar={setSidebar}
             />
-            <main className="min-h-[calc(100vh_-_88px)] w-full min-w-0">
-              <Outlet context={{isAdmin: userProfile.claims.admin}}/>
+            <main className="min-h-[calc(100vh_-_88px)] relative w-full min-w-0">
+              <Outlet context={{ isAdmin: userProfile.claims.admin }} />
             </main>
           </div>
         </div>
