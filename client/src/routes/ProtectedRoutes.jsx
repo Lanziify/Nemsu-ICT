@@ -90,7 +90,6 @@ function ProtectedRoutes({ allowedUser }) {
     }, 3000);
   }, [isDtoLoading]);
   
-  // Render the preloader if isLoading is true
   if (isDtoLoading && loading) {
     return <Preloader />;
   }

@@ -1,11 +1,8 @@
 import {
   MdHome,
-  MdCreate,
-  MdOutlineHourglassFull,
-  MdCheckCircle,
   MdSpaceDashboard,
-  MdCancel,
   MdEditDocument,
+  MdHistory
 } from "react-icons/md";
 import { IoPeople, IoDocuments, IoNotifications } from "react-icons/io5";
 
@@ -21,9 +18,14 @@ export const userItems = [
     icon: <IoNotifications size={24} />,
   },
   {
-    path: "/ongoing",
-    name: "Ongoing Requests",
+    path: "/request",
+    name: "Requests",
     icon: <MdEditDocument size={24} />,
+  },
+  {
+    path: "/history",
+    name: "History",
+    icon: <MdHistory size={24} />,
   },
 ];
 

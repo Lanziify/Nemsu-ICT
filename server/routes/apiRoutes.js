@@ -2,31 +2,38 @@ const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/validateTokenHandler");
 const {
-  createUser,
-  createRequest,
-  getAllUsers,
-  getAllRequest,
-  getUserRequests,
-  getRequestNotification,
-  getRequisitionResponseNotification,
-  updateFcmToken,
-  respondUserRequest,
-  setAdmin,
-  readNotification,
+  dtoUserController,
+  dtoRequestController,
+  dtoNotificationController,
 } = require("../controller/firestoreController");
 
-router.route("/register").post(authMiddleware, createUser);
-router.route("/create").post(authMiddleware, createRequest);
+// Users
+router.route("/register").post(authMiddleware, dtoUserController.createUser);
+router.route("/users").get(dtoUserController.getAllUsers);
+router.route("/update/user/:uid").put(dtoUserController.updateUser);
+router.route("/admin/:id").put(dtoUserController.setAdmin);
 
-router.route("/users").get(getAllUsers);
-router.route("/requests").get(getAllRequest);
-router.route("/request/:id").get(getUserRequests);
-router.route("/notification/request").get(getRequestNotification);
-router.route("/notification/:id").get(getRequisitionResponseNotification);
+// Requests
+router
+  .route("/create")
+  .post(authMiddleware, dtoRequestController.createRequest);
 
-router.route("/admin/:id").put(setAdmin);
-router.route("/fcm").put(updateFcmToken);
-router.route("/request/:id").put(respondUserRequest);
-router.route("/notification/:id").put(readNotification);
+// Requests (admin)
+router.route("/requests").get(dtoRequestController.getAllRequest);
+router.route("/request/:id").put(dtoRequestController.respondUserRequest);
+// Requests (user)
+router.route("/user/requests/:id").get(dtoRequestController.getUserRequests);
+
+// Notifications
+router.route("/fcm").put(dtoNotificationController.updateFcmToken);
+router
+  .route("/notification/request")
+  .get(dtoNotificationController.getRequestNotification);
+router
+  .route("/notification/:id")
+  .get(dtoNotificationController.getRequisitionResponseNotification);
+router
+  .route("/notification/:id")
+  .put(dtoNotificationController.readNotification);
 
 module.exports = router;

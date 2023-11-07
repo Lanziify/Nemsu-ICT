@@ -5,7 +5,7 @@ import { useAuth } from "../../contexts/AuthContext";
 export default function Users() {
   const { user } = useAuth();
   return (
-    <div className="grid h-full place-items-center">
+    <div className="">
       <RegistrationForm user={user} />
     </div>
   );

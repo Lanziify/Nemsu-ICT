@@ -1,6 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import React, { useState } from "react";
 import {
   MdMoreHoriz,
   MdArrowDropDown,
@@ -10,41 +8,15 @@ import {
   MdCheckCircle,
   MdCancel,
 } from "react-icons/md";
-import { createPopper } from "@popperjs/core";
-import { usePopper } from "react-popper";
-import {
-  popUp,
-  popUpItem,
-  popUpItemRight,
-  popUpRight,
-} from "../animations/variants";
-import Button from "./Button";
-import Portal from "./Portal";
+
 import { ACCEPTED, CANCELED, COMPLETED, PENDING } from "../utils/status";
-import { update } from "react-spring";
 
 const ITEMS_PER_PAGE = 5; // Number of items to display per page
 
-function RequestList(props) {
-  const { list, admin, handleResponse } = props;
-  const navigate = useNavigate();
-
+function DtoTableList(props) {
   const [sortedRequest, setSortedRequest] = useState();
-  const [option, setOption] = useState({ show: false, id: null });
   const [ascending, setAscending] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-
-  const optionContainer = useRef(null);
-  const optionReference = useRef(null);
-  const optionElement = useRef(null);
-
-  const { styles, attributes } = usePopper(
-    optionReference.current,
-    optionElement.current,
-    {
-      placement: "bottom-end",
-    }
-  );
 
   const sortRequestList = (item) => {
     const sortedList = [...getCurrentPageItems()].sort((a, b) => {
@@ -142,7 +114,7 @@ function RequestList(props) {
     if (item.type) {
       return (
         <th
-          className={`p-4 text-center max-sm:hidden ${!list && "border-b "}`}
+          className={`p-4 text-center max-sm:hidden ${!props.list && "border-b "}`}
           key={index}
         >
           <div
@@ -190,21 +162,10 @@ function RequestList(props) {
     }
   };
 
-  const handleOptionClick = (e, request) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // optionReference.current = request.requestId;
-    !option.show && !option.id
-      ? setOption({ show: true, id: request.requestId })
-      : option.id === request.requestId
-      ? setOption({})
-      : setOption({ show: true, id: request.requestId });
-  };
-
   const getCurrentPageItems = () => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     const end = start + ITEMS_PER_PAGE;
-    return list.slice(start, end);
+    return props.list.slice(start, end);
   };
 
   const handlePaginationPrev = () => {
@@ -215,28 +176,9 @@ function RequestList(props) {
   const handlePaginationNext = () => {
     setSortedRequest();
     setCurrentPage((prevPage) =>
-      Math.min(prevPage + 1, Math.ceil(list.length / ITEMS_PER_PAGE))
+      Math.min(prevPage + 1, Math.ceil(props.list.length / ITEMS_PER_PAGE))
     );
   };
-
-  const handleRequest = (request) => {
-    navigate(`request/${request.requestId}`);
-  };
-
-  // console.log(optionReference.current)
-
-  // useEffect(() => {
-  //   const outsideClick = (e) => {
-  //     if (!optionContainer.current.contains(e.target)) {
-  //       console.log("hide");
-  //     }
-  //   };
-
-  //   document.addEventListener("mousedown", outsideClick);
-  //   return () => {
-  //     document.removeEventListener("mousedown", outsideClick);
-  //   };
-  // }, []);
 
   return (
     <div className="flex min-w-fit flex-col">
@@ -244,8 +186,6 @@ function RequestList(props) {
         {/* <caption className="text-2xl font-bold p-2 md:max-lg:hidden max-sm:block max-sm:p-4 text-cyan-500">Request List</caption> */}
         <thead>
           <tr className="border-b max-sm:border-0">
-            {/* <th className="p-2 text-center max-sm:hidden">No.</th> */}
-
             {/* Header Items */}
             {headerItems.map((item, index) => tableHeader(item, index))}
           </tr>
@@ -258,64 +198,10 @@ function RequestList(props) {
                 <tr
                   key={index}
                   className="cursor-pointer border-b duration-150 last:border-0 hover:bg-gray-500/10 max-sm:block max-sm:rounded-2xl max-sm:border max-sm:p-4 max-sm:last:border"
-                  onClick={() => handleRequest(request)}
+                  onClick={() => props.onClick(request)}
                 >
                   {headerItems.map((item, index) =>
                     tableData(item, request, index)
-                  )}
-
-                  {admin && (
-                    <td className="pr-4 max-sm:hidden">
-                      <div
-                        ref={optionReference}
-                        className={`${request.requestId} no_selection m-auto w-fit rounded-md p-1 text-xs duration-300 hover:bg-gray-300 max-sm:m-0 max-sm:hidden`}
-                        onClick={(e) => {
-                          handleOptionClick(e, request);
-                        }}
-                      >
-                        <MdMoreHoriz size={18} />
-                      </div>
-                      {/* <Portal> */}
-                      <div
-                        ref={optionElement}
-                        className={`z-[1] rounded-xl border bg-white p-3 ${
-                          option.show && request.requestId === option.id
-                            ? "visible opacity-100"
-                            : "invisible hidden opacity-0"
-                        }`}
-                        style={styles.popper}
-                        {...attributes.popper}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {request.status === PENDING && (
-                          <>
-                            <Button
-                              success
-                              width="full"
-                              rounded="md"
-                              iconStart={<MdCheckCircle size={18} />}
-                              buttonText="Accept"
-                              onClick={() => {
-                                handleResponse(request.requestId, ACCEPTED);
-                                setOption({});
-                              }}
-                            />
-                            <Button
-                              danger
-                              width="full"
-                              rounded="md"
-                              iconStart={<MdCancel size={18} />}
-                              buttonText="Cancel"
-                              onClick={() => {
-                                handleResponse(request.requestId, CANCELED);
-                                setOption({});
-                              }}
-                            />
-                          </>
-                        )}
-                      </div>
-                      {/* </Portal> */}
-                    </td>
                   )}
                 </tr>
               ))}
@@ -333,10 +219,10 @@ function RequestList(props) {
       <div className="sticky bottom-0 right-0 top-0 mt-2 flex gap-2 self-end">
         <p className="px-4 py-2 text-xs">
           Page{" "}
-          {currentPage === 1 && !Object.keys(list).length
+          {currentPage === 1 && !Object.keys(props.list).length
             ? currentPage - 1
             : currentPage}{" "}
-          of {Math.ceil(list.length / ITEMS_PER_PAGE)}
+          of {Math.ceil(props.list.length / ITEMS_PER_PAGE)}
         </p>
         <button
           className="rounded-md p-2 duration-300 hover:bg-gray-200 disabled:text-gray-300"
@@ -349,8 +235,8 @@ function RequestList(props) {
           className="rounded-md p-2 duration-300 hover:bg-gray-200 disabled:text-gray-300"
           onClick={handlePaginationNext}
           disabled={
-            currentPage > list.length ||
-            currentPage === Math.ceil(list.length / ITEMS_PER_PAGE)
+            currentPage > props.list.length ||
+            currentPage === Math.ceil(props.list.length / ITEMS_PER_PAGE)
           }
         >
           <MdChevronRight size={18} />
@@ -360,4 +246,4 @@ function RequestList(props) {
   );
 }
 
-export default RequestList;
+export default DtoTableList;

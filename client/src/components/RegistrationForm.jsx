@@ -135,7 +135,7 @@ function RegistrationForm(props) {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="relative flex min-w-[480px] flex-col items-center justify-between gap-4 rounded-2xl border-gray-100 bg-white p-6 shadow-xl"
+      className="relative flex h-full flex-col items-center justify-center gap-4 rounded-2xl border-gray-100 bg-white p-6 shadow-sm"
       onSubmit={handleRegistration}
     >
       <motion.h1

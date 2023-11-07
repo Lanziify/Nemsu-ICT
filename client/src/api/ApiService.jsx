@@ -46,11 +46,7 @@ class ApiService {
     } catch (error) {}
   }
   static async fetchRequest(userId) {
-    try {
-      return await axios.get(`${BASE_URL}/request/${userId}`);
-    } catch (error) {
-      throw new Error(error.response.data.message);
-    }
+    return await axios.get(`${BASE_URL}/user/requests/${userId}`);
   }
   static async fetchUserRequests() {
     try {

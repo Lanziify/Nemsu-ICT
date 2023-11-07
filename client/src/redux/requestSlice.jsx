@@ -4,20 +4,20 @@ const requestSlice = createSlice({
   name: "requests",
   initialState: {
     requests: [],
-    loading: true,
+    fetchingRequests: true,
     isResponding: false,
   },
   reducers: {
     setData: (state, action) => {
       state.requests = action.payload;
-      state.loading = false;
+      state.fetchingRequests = false;
       state.error = null;
     },
     setLoading: (state, action) => {
-      state.loading = action.payload;
+      state.fetchingRequests = action.payload;
     },
     setError: (state, action) => {
-      state.loading = false;
+      state.fetchingRequests = false;
       state.error = action.payload;
     },
   }

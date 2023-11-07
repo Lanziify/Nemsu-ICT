@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 // Routes
 import PublicRoutes from "./routes/PublicRoutes";
@@ -9,28 +9,24 @@ import Hero from "./pages/Hero";
 import Notfound from "./pages/Notfound";
 // Import user pages
 import Home from "./pages/user/Home";
-import Request from "./pages/user/Request";
 import Settings from "./pages/user/Settings";
-import Ongoing from "./pages/user/Ongoing";
-import Completed from "./pages/user/Completed";
+import UserRequests from "./pages/user/Requests";
+import History from "./pages/user/History";
 // Import admin pages
 import Dashboard from "./pages/admin/Dashboard";
 import Users from "./pages/admin/Users";
-import Requests from "./pages/admin/Requests";
-import RequestDetails from "./pages/admin/RequestDetails";
+import AdminRequests from "./pages/admin/Requests";
+// Shared Pages
 import Notifications from "./pages/Notifications";
-import Preloader from "./components/Preloader";
-import { useDispatch, useSelector } from "react-redux";
-import { setDtoLoading } from "./redux/dtoLoadingSlice";
+import RequestDetails from "./pages/RequestDetails";
 
 function App() {
-
   return (
     <Routes>
       <Route element={<ProtectedRoutes allowedUser={[true]} />}>
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="users" element={<Users />} />
-        <Route path="list/:tab" element={<Requests />} />
+        <Route path="list/:tab" element={<AdminRequests />} />
         <Route path="list" element={<Navigate replace to="/list/pending" />} />
         <Route path="list/:tab/request/:id" element={<RequestDetails />} />
         <Route path="notifications/request/:id" element={<RequestDetails />} />
@@ -39,9 +35,10 @@ function App() {
 
       <Route element={<ProtectedRoutes allowedUser={[false]} />}>
         <Route path="home" element={<Home />} />
-        <Route path="ongoing" element={<Ongoing />} />
-        <Route path="ongoing/request/:requestId" element={<RequestDetails />} />
-        <Route path="completed" element={<Completed />} />
+        <Route path="request" element={<UserRequests />} />
+        {/* <Route path="request/:tab" element={<UserRequests />} /> */}
+        <Route path="request/:requestId" element={<RequestDetails />} />
+        <Route path="history" element={<History />} />
       </Route>
 
       {/* {user && ( */}
