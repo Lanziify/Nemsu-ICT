@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
-import RequestList from "../../components/RequestList";
+import React, { useEffect, useState } from "react";
+import DtoTableList from "../../components/DtoTableList";
 import ApiService from "../../api/apiService";
-import { NavLink, useLocation, useOutletContext } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
   MdHourglassEmpty,
@@ -10,30 +10,21 @@ import {
   MdOutlineCancel,
   MdFilterList,
 } from "react-icons/md";
-import { FaSearch } from "react-icons/fa";
 import { BsFiles, BsFilesAlt } from "react-icons/bs";
-
-// import { createPopper } from '@popperjs/core';
-
 import LineChart from "../../components/LineChart";
 import DoughnutChart from "../../components/DoughnutChart";
 import AnimatedNumber from "../../components/AnimatedNumber";
 import { AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
-
 import { ACCEPTED, CANCELED, COMPLETED, PENDING } from "../../utils/status";
-import { usePopper } from "react-popper";
 import Preloader from "../../components/Preloader";
-import { query } from "firebase/firestore";
+import DtoSearchBar from "../../components/DtoSearchBar";
+import { filterItems } from "../../utils/filterItems";
 
 export default function Requests() {
-  const { isAdmin } = useOutletContext();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const { requests, loading } = useSelector((state) => state.requests);
-  const [searchedRequest, setSearchedRequest] = useState();
-
-  const [showFilter, setShowFilter] = useState(false);
   const [activeItems, setActiveItems] = useState({
     requestId: true,
     name: true,
@@ -49,17 +40,8 @@ export default function Requests() {
     created: true,
   });
 
-  const filterContainer = useRef();
-  const popperReference = useRef();
-  const popperElement = useRef();
-
-  const { styles, attributes } = usePopper(
-    popperReference.current,
-    popperElement.current,
-    {
-      placement: "bottom-end",
-    }
-  );
+  const { requests, fetchingRequests } = useSelector((state) => state.requests);
+  const [searchedRequest, setSearchedRequest] = useState();
 
   const status = [
     { status: PENDING, style: "text-yellow-500" },
@@ -94,79 +76,6 @@ export default function Requests() {
     },
   ];
 
-  const filterItems = [
-    {
-      title: "Name",
-      item: "name",
-      value: activeItems.name,
-    },
-    {
-      title: "Email",
-      item: "email",
-      value: activeItems.email,
-    },
-    {
-      title: "Position",
-      item: "position",
-      value: activeItems.position,
-    },
-    {
-      title: "Office",
-      item: "office",
-      value: activeItems.office,
-    },
-    {
-      title: "Device",
-      item: "device",
-      value: activeItems.device,
-    },
-    {
-      title: "Brand",
-      item: "brand",
-      value: activeItems.brand,
-    },
-    {
-      title: "Model",
-      item: "model",
-      value: activeItems.model,
-    },
-    {
-      title: "Serial No.",
-      item: "serial",
-      value: activeItems.serial,
-    },
-    {
-      title: "Property No.",
-      item: "property",
-      value: activeItems.property,
-    },
-    {
-      title: "Status",
-      item: "status",
-      value: activeItems.status,
-    },
-  ];
-
-  const getStatusTotal = (status) => {
-    const total = requests.filter((item) => {
-      return item.status.toLowerCase().includes(status.toLowerCase());
-    });
-    return total.length;
-  };
-
-  const handleRequestSearch = (search, list) => {
-    const query = search.toLowerCase()
-    const result = list.filter((item) => {
-      return (
-        item.requestId.toLowerCase().includes(query) ||
-        item.name.toLowerCase().includes(query) ||
-        item.device.toLowerCase().includes(query) ||
-        item.brand.toLowerCase().includes(query)
-      );
-    });
-    search ? setSearchedRequest(result) : setSearchedRequest();
-  };
-
   const filteredList = (searchedRequest ? searchedRequest : requests).filter(
     (item) => {
       return item.status.toLowerCase().includes(
@@ -177,6 +86,34 @@ export default function Requests() {
       );
     }
   );
+
+  const handleRequestSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    const result = filteredList.filter((item) => {
+      return (
+        item.requestId.toLowerCase().includes(query) ||
+        item.name.toLowerCase().includes(query) ||
+        item.device.toLowerCase().includes(query) ||
+        item.brand.toLowerCase().includes(query)
+      );
+    });
+    console.log(result);
+    e.target.value ? setSearchedRequest(result) : setSearchedRequest();
+  };
+
+  const handleFilterHeader = (e) => {
+    setActiveItems({
+      ...activeItems,
+      [e.target.name]: !activeItems[e.target.name],
+    });
+  };
+
+  const getStatusTotal = (status) => {
+    const total = requests.filter((item) => {
+      return item.status.toLowerCase().includes(status.toLowerCase());
+    });
+    return total.length;
+  };
 
   const handleResponse = async (requestId, status) => {
     try {
@@ -214,41 +151,22 @@ export default function Requests() {
     }
   };
 
-  const handleFilterHeader = (e) => {
-    setActiveItems({
-      ...activeItems,
-      [e.target.name]: !activeItems[e.target.name],
-    });
+  const handleRequestClick = (request) => {
+    navigate(`request/${request.requestId}`);
   };
 
   useEffect(() => {
     const data = window.localStorage.getItem("filteredTable");
-    setActiveItems(JSON.parse(data));
+    if (data) {
+      setActiveItems(JSON.parse(data));
+    }
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(
-      "filteredTable",
-      JSON.stringify(activeItems, undefined, 2)
-    );
+    window.localStorage.setItem("filteredTable", JSON.stringify(activeItems));
   }, [activeItems]);
 
-  useEffect(() => {
-    const outsideClick = (e) => {
-      if (!filterContainer.current.contains(e.target)) {
-        setShowFilter(false);
-      }
-    };
-
-    document.addEventListener("mousedown", outsideClick);
-    return () => {
-      document.removeEventListener("mousedown", outsideClick);
-    };
-  }, []);
-
-
-
-  return !loading ? (
+  return !fetchingRequests ? (
     <>
       <div className="mb-4 grid grid-cols-3 gap-4 [&>div]:rounded-2xl [&>div]:shadow-sm [&>div]:max-sm:col-span-full">
         <div className="col-span-2 h-48 flex-1 overflow-hidden bg-white p-4 max-sm:p-0">
@@ -299,9 +217,7 @@ export default function Requests() {
                     ? `text-cyan-500`
                     : `${item.style}`
                 }`}
-              >
-                {item.icon}
-              </div>
+              ></div>
               <p>{item.title}</p>
               {location.pathname.endsWith(item.path) && (
                 <span className="absolute bottom-0 left-0 right-0 m-auto h-[2px] w-[calc(100%_-_48px)] bg-cyan-500"></span>
@@ -311,65 +227,24 @@ export default function Requests() {
         </div>
 
         <div className="flex items-center justify-between gap-4">
-          <div className="flex flex-1 items-center">
-            <FaSearch className="absolute ml-4 text-gray-400" size={18} />
-            <input
-              className="w-full rounded-full bg-white p-2 pl-[48px] text-gray-400 shadow-sm outline-none"
-              type="text"
-              placeholder="Search"
-              onChange={(e) => {
-                handleRequestSearch(e.target.value, filteredList);
-              }}
-            />
-          </div>
-          {isAdmin && (
-            <div ref={filterContainer}>
-              <div
-                ref={popperReference}
-                className="no_selection m-auto w-fit cursor-pointer rounded-full bg-white p-2 shadow-sm duration-300 hover:bg-gray-200"
-                onClick={() => {
-                  setShowFilter(!showFilter);
-                }}
-              >
-                <MdFilterList size={20} />
-              </div>
-              <div
-                ref={popperElement}
-                className={`z-[1] mt-2 rounded-2xl border bg-white p-3  ${
-                  showFilter ? "visible opacity-100" : "invisible opacity-0"
-                } transition-all duration-150`}
-                style={styles.popper}
-                {...attributes.popper}
-              >
-                {filterItems.map((item, index) => (
-                  <div className="flex gap-2" key={index}>
-                    <input
-                      className="accent-cyan-600"
-                      type="checkbox"
-                      name={item.item}
-                      id={index}
-                      value={item.value}
-                      onChange={handleFilterHeader}
-                      checked={item.value}
-                      autoComplete="off"
-                    />
-                    <p className="text-sm">{item.title}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <DtoSearchBar
+            filterEnable={true}
+            filterItems={filterItems(activeItems)}
+            onFilterChange={handleFilterHeader}
+            onSearchChange={handleRequestSearch}
+          />
         </div>
       </div>
 
       <div className="rounded-2xl bg-white p-6 text-sm shadow-sm max-sm:p-4">
         <div className="overflow-x-auto rounded-md">
           <AnimatePresence initial={false}>
-            <RequestList
+            <DtoTableList
               list={filteredList}
               {...activeItems}
               admin
               handleResponse={handleResponse}
+              onClick={handleRequestClick}
             />
           </AnimatePresence>
         </div>

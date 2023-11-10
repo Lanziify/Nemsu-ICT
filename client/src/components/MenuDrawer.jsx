@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import { NavLink } from "react-router-dom";
 import { IoClose } from "react-icons/io5";
 import { AnimatePresence, motion } from "framer-motion";

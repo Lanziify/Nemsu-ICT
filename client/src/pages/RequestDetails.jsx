@@ -1,29 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { MdChevronLeft } from "react-icons/md";
 import { FaPencilAlt, FaCheck, FaSearch } from "react-icons/fa";
-import { useLocation, useNavigate } from "react-router-dom";
-import RequestProgress from "../../components/RequestProgress";
-import { convertCreatedDate, getTimeAgo } from "../../utils/timeUtils";
-import Button from "../../components/Button";
+import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
+import RequestProgress from "../components/RequestProgress";
+import { convertCreatedDate, getTimeAgo } from "../utils/timeUtils";
+import Button from "../components/Button";
 import Swal from "sweetalert2";
-import ApiService from "../../api/apiService";
-import ResponseForm from "../../components/ResponseForm";
-import Notfound from "../Notfound";
+import ApiService from "../api/apiService";
+import ResponseForm from "../components/ResponseForm";
+import Notfound from "./Notfound";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import {
   carousell,
   fadeDefault,
   popUp,
   popUpItem,
-} from "../../animations/variants";
-import ResizablePanel from "../../components/ResizablePanel";
-import { PENDING, ACCEPTED, COMPLETED, CANCELED } from "../../utils/status";
+} from "../animations/variants";
+import ResizablePanel from "../components/ResizablePanel";
+import { PENDING, ACCEPTED, COMPLETED, CANCELED } from "../utils/status";
 import { useDocumentData } from "react-firebase-hooks/firestore";
-import { firestore } from "../../config/firebase-config";
+import { firestore } from "../config/firebase-config";
 import { doc } from "firebase/firestore";
-import Preloader from "../../components/Preloader";
+import Preloader from "../components/Preloader";
 
 export default function RequestDetails() {
+  const { isAdmin } = useOutletContext();
   const navigate = useNavigate();
   const location = useLocation();
   const currentRequestId = location.pathname.substring(
@@ -31,17 +32,15 @@ export default function RequestDetails() {
   );
 
   const dtoRequestsDocRef = doc(firestore, "requests", currentRequestId);
-  const [request, fetching, error] =
-    useDocumentData(dtoRequestsDocRef);
+  const [request, fetching, error] = useDocumentData(dtoRequestsDocRef);
 
-  const stringyfiedRequest = JSON.stringify({  request });
+  const stringyfiedRequest = JSON.stringify({ request });
   const parsedRequest = JSON.parse(stringyfiedRequest);
-  const currentRequest = parsedRequest.request
+  const currentRequest = parsedRequest.request;
 
   const [isResponding, setIsResponding] = useState(false);
   const [tuple, setTuple] = useState([null, isResponding]);
   const [loading, setLoading] = useState(false);
-
 
   const requestDetails = [
     {
@@ -226,10 +225,8 @@ export default function RequestDetails() {
               }`}
             >
               <ResizablePanel direction={direction}>
-                {((!isResponding &&
-                  currentRequest?.status != CANCELED) ||
-                  (isResponding &&
-                    currentRequest?.status != ACCEPTED)) && (
+                {((!isResponding && currentRequest?.status != CANCELED) ||
+                  (isResponding && currentRequest?.status != ACCEPTED)) && (
                   <motion.div className="p-6">
                     <RequestProgress request={currentRequest} />
                   </motion.div>
@@ -251,8 +248,7 @@ export default function RequestDetails() {
               }`}
             >
               <div className="mb-4 flex h-9 items-center justify-between text-xs">
-                {currentRequest?.status === ACCEPTED &&
-                !isResponding ? (
+                {isAdmin && currentRequest?.status === ACCEPTED && !isResponding ? (
                   <>
                     <h1 className="text-xl font-bold">Request Details</h1>
                     <Button
@@ -282,7 +278,7 @@ export default function RequestDetails() {
                 </div>
               ))}
 
-              {currentRequest?.status === PENDING && (
+              {isAdmin && currentRequest?.status === PENDING && (
                 <div className="mt-4 flex justify-between gap-4">
                   <Button
                     secondary
@@ -290,10 +286,7 @@ export default function RequestDetails() {
                     width="full"
                     buttonText="Cancel Request"
                     onClick={() =>
-                      handleResponse(
-                        currentRequest?.requestId,
-                        CANCELED
-                      )
+                      handleResponse(currentRequest?.requestId, CANCELED)
                     }
                     disabled={loading}
                   />
@@ -303,10 +296,7 @@ export default function RequestDetails() {
                     width="full"
                     buttonText="Accept Request"
                     onClick={() =>
-                      handleResponse(
-                        currentRequest?.requestId,
-                        ACCEPTED
-                      )
+                      handleResponse(currentRequest?.requestId, ACCEPTED)
                     }
                     disabled={loading}
                   />

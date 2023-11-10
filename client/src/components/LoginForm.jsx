@@ -43,7 +43,7 @@ function LoginForm() {
   return (
     <>
       <form
-        className="flex w-96 min-w-0 flex-col items-center gap-4 rounded-xl bg-white px-8 pb-8 pt-6 shadow-sm"
+        className="flex w-96 min-w-0 flex-col items-center gap-4 rounded-2xl bg-white px-8 pb-8 pt-6 shadow-sm"
         onSubmit={handleSubmit}
       >
         {/* <div className="h-24 min-w-[96px] rounded-full border bg-gradient-to-br from-cyan-100 to-cyan-500"></div> */}

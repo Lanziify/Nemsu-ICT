@@ -5,13 +5,12 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { ToastContainer } from "react-toastify";
 import ModalBackdrop from "../components/ModalBackdrop";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
-import { fadeDefault } from "../animations/variants";
 import RequestForm from "../components/RequestForm";
 import MenuDrawer from "../components/MenuDrawer";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import { collection, orderBy, query } from "firebase/firestore";
+import { collection, orderBy, query, where } from "firebase/firestore";
 import { firestore } from "../config/firebase-config";
 import { useDispatch, useSelector } from "react-redux";
 import { setData, setLoading, setError } from "../redux/requestSlice";
@@ -19,15 +18,23 @@ import { setDtoLoading } from "../redux/dtoLoadingSlice";
 import Preloader from "../components/Preloader";
 
 function ProtectedRoutes({ allowedUser }) {
-  const { user, userProfile } = useAuth();
+  const { user, userToken } = useAuth();
   const dispatch = useDispatch();
 
   const dtoRequestsRef = collection(firestore, "requests");
   const requestQuery = query(dtoRequestsRef, orderBy("createdAt", "desc"));
-  const [list, loading, error] = useCollectionData(requestQuery);
+  const userRequestQuery = query(
+    dtoRequestsRef,
+    where("uid", "==", user.uid),
+    orderBy("createdAt", "desc")
+  );
+
+  const [adminRequestList, adminRequestFetchloading, adminError] =
+    useCollectionData(requestQuery);
+  const [userRequests, userRequestFetchloading, userError] =
+    useCollectionData(userRequestQuery);
 
   const { isDtoLoading } = useSelector((state) => state.dtoLoading);
-
 
   const [isSidebarToggled, setIsSidebarToggled] = useState(true);
   const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 960);
@@ -53,16 +60,25 @@ function ProtectedRoutes({ allowedUser }) {
 
   useEffect(() => {
     try {
-      const stringyfiedList = JSON.stringify(list);
-      dispatch(setLoading(loading))
-      if (stringyfiedList) {
-        const parsedList = JSON.parse(stringyfiedList);
-        dispatch(setData(parsedList));
+      if (userToken.claims.admin) {
+        const stringyfiedList = JSON.stringify(adminRequestList);
+        dispatch(setLoading(adminRequestFetchloading));
+        if (stringyfiedList) {
+          const parsedList = JSON.parse(stringyfiedList);
+          dispatch(setData(parsedList));
+        }
+      } else {
+        const stringyfiedList = JSON.stringify(userRequests);
+        dispatch(setLoading(userRequestFetchloading));
+        if (stringyfiedList) {
+          const parsedList = JSON.parse(stringyfiedList);
+          dispatch(setData(parsedList));
+        }
       }
     } catch (error) {
       console.log(error);
     }
-  }, [list]);
+  }, [adminRequestList, userRequests]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -84,19 +100,17 @@ function ProtectedRoutes({ allowedUser }) {
     }
   }, [showSidebar]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      dispatch(setDtoLoading(false));
-    }, 3000);
-  }, [isDtoLoading]);
-  
-  // Render the preloader if isLoading is true
-  if (isDtoLoading && loading) {
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     dispatch(setDtoLoading(false));
+  //   }, 3000);
+  // }, [isDtoLoading]);
+
+  if ((isDtoLoading && adminRequestFetchloading) || userRequestFetchloading) {
     return <Preloader />;
   }
 
-
-  return allowedUser.includes(userProfile?.claims?.admin) ? (
+  return allowedUser.includes(userToken?.claims?.admin) ? (
     <>
       <div className="relative">
         <ToastContainer
@@ -127,15 +141,15 @@ function ProtectedRoutes({ allowedUser }) {
           <div className="mx-auto flex h-full w-full max-w-7xl gap-4 p-4">
             <Sidebar
               isToggled={showSidebar && isSidebarToggled}
-              isAdmin={userProfile.claims.admin}
+              isAdmin={userToken.claims.admin}
             />
             <MenuDrawer
               isToggled={!showSidebar && isSidebarToggled}
-              isAdmin={userProfile.claims.admin}
+              isAdmin={userToken.claims.admin}
               closeSidebar={setSidebar}
             />
-            <main className="min-h-[calc(100vh_-_88px)] relative w-full min-w-0">
-              <Outlet context={{ isAdmin: userProfile.claims.admin }} />
+            <main className="relative min-h-[calc(100vh_-_88px)] w-full min-w-0">
+              <Outlet context={{ isAdmin: userToken.claims.admin }} />
             </main>
           </div>
         </div>

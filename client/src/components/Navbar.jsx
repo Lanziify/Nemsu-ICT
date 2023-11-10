@@ -18,7 +18,7 @@ import { messaging } from "../config/firebase-config";
 import { toast } from "react-toastify";
 import notificationRingtone from "../assets/notification.mp3";
 import { AnimatePresence, motion } from "framer-motion";
-import { fadeDefault, popUp, popUpItem } from "../animations/variants";
+import { popUp, popUpItem } from "../animations/variants";
 import ApiService from "../api/apiService";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchNotifications } from "../redux/notificationSlice";
@@ -27,7 +27,7 @@ import dtoLogo from "../assets/dtoLogo.svg";
 
 function Navbar(props) {
   const { isToggled, isCreatingRequest } = props;
-  const { user, userProfile, logoutUser } = useAuth();
+  const { user, userToken, logoutUser } = useAuth();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { notifications, unreads, showUnreads } = useSelector(
@@ -212,6 +212,15 @@ function Navbar(props) {
         </div>
 
         <div className=" flex items-stretch gap-4">
+          {/* Create request button */}
+          {!userToken.claims.admin && (
+            <Button
+              primary
+              rounded="md"
+              buttonText="Create a request"
+              onClick={isCreatingRequest}
+            />
+          )}
           {/* Notification */}
           <div
             className="relative flex items-center p-1"
@@ -272,15 +281,7 @@ function Navbar(props) {
               )}
             </AnimatePresence>
           </div>
-          {/* Create request button */}
-          {!userProfile.claims.admin && (
-            <Button
-              primary
-              rounded="md"
-              buttonText="Create a request"
-              onClick={isCreatingRequest}
-            />
-          )}
+
           {/* Profile */}
           <div className="relative flex cursor-pointer items-center">
             <div
@@ -302,9 +303,17 @@ function Navbar(props) {
                   ref={profileFloater}
                   className="absolute right-0 top-full -z-10 mt-4 min-w-[280px] rounded-2xl bg-white p-4 shadow-xl"
                 >
-                  <div className="mb-2">
+                  <div>
                     <div className="m-auto mb-2 h-[96px] max-w-[96px] rounded-full bg-gradient-to-br from-cyan-100 to-cyan-500"></div>
-                    <p className="mb-2 text-center">{user.email}</p>
+                    <p
+                      className={`text-center text-lg font-bold ${
+                        userToken.claims.admin
+                          ? "text-cyan-500"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {user.displayName}
+                    </p>
                     <Button
                       width="full"
                       rounded="md"
@@ -316,7 +325,7 @@ function Navbar(props) {
                       <NavLink
                         key={index}
                         to={item.path}
-                        className="flex cursor-pointer place-items-center gap-4 rounded-md px-4 py-2 font-semibold  hover:bg-gray-300/50"
+                        className="flex cursor-pointer place-items-center gap-4 rounded-md px-4 py-2 font-semibold hover:bg-gray-300/50"
                       >
                         <div>{item.icon}</div>
                         <p>{item.name}</p>

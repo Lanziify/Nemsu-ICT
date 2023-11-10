@@ -7,7 +7,7 @@ const UserAuthContext = createContext();
 export function AuthContextProvider({ children }) {
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(true);
-  const [userProfile, setUserProfile] = useState(null);
+  const [userToken, setUserToken] = useState(null);
   // Login user with email and password
   function loginUser(email, password) {
     return signInWithEmailAndPassword(auth, email, password);
@@ -27,19 +27,19 @@ export function AuthContextProvider({ children }) {
           .getIdTokenResult()
           .then((idTokenResult) => {
             const profileData = idTokenResult;
-            setUserProfile(profileData);
+            setUserToken(profileData);
           })
           .catch((error) => {
             console.error("Error fetching user profile:", error);
           });
       } else {
-        setUserProfile(null);
+        setUserToken(null);
       }
     });
     return unsubscribe;
   }, []);
 
-  const value = { user, loginUser, logoutUser, userProfile };
+  const value = { user, loginUser, logoutUser,  userToken };
 
   return (
     <UserAuthContext.Provider value={value}>

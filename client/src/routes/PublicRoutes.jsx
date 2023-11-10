@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import HeroHeader from "../components/HeroHeader";
 
 function PublicRoutes() {
-  const { user, userProfile } = useAuth();
+  const { user, userToken } = useAuth();
   return !user ? (
     <div className="flex min-h-screen flex-col bg-gray-100">
       <HeroHeader />
@@ -13,7 +13,7 @@ function PublicRoutes() {
         </main>
       </div>
     </div>
-  ) : userProfile?.claims?.admin ? (
+  ) : userToken?.claims?.admin ? (
     <Navigate to={"dashboard"} />
   ) : (
     <Navigate to={"home"} />
